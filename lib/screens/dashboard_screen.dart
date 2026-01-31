@@ -1,9 +1,54 @@
 import 'package:flutter/material.dart';
 import 'app_selection_screen.dart';
 import 'limit_settings_screen.dart';
+import '../services/step_service.dart';
+import '../services/app_lock_service.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  final StepService _stepService = StepService();
+  final AppLockService _appLockService = AppLockService();
+  
+  int _steps = 0;
+  int _lockedAppsCount = 0;
+  
+  @override
+  void initState() {
+    super.initState();
+    _initServices();
+  }
+  
+  Future<void> _initServices() async {
+    await _stepService.init();
+    await _appLockService.init();
+    
+    _stepService.stepStream.listen((steps) {
+      if (mounted) {
+        setState(() {
+          _steps = steps;
+        });
+      }
+    });
+    
+    // Initial load
+    setState(() {
+        _steps = _stepService.getCurrentSteps();
+        _lockedAppsCount = _appLockService.lockedPackages.length;
+    });
+  }
+  
+  // Refresh locked apps count when returning from selection screen
+  void _refreshData() {
+      setState(() {
+          _lockedAppsCount = _appLockService.lockedPackages.length;
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,10 +100,13 @@ class DashboardScreen extends StatelessWidget {
                           'Select Apps',
                           Icons.apps_rounded,
                           Theme.of(context).colorScheme.secondary,
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const AppSelectionScreen()),
-                          ),
+                          () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const AppSelectionScreen()),
+                            );
+                            _refreshData();
+                          },
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -96,6 +144,13 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildStatusCard(BuildContext context) {
+    // Mock goal for now, should come from settings
+    const int stepGoal = 5000;
+    int remaining = stepGoal - _steps;
+    if (remaining < 0) remaining = 0;
+    double progress = _steps / stepGoal;
+    if (progress > 1.0) progress = 1.0;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -126,9 +181,9 @@ class DashboardScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    '1,240',
-                    style: TextStyle(
+                  Text(
+                    '$remaining',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 36,
                       fontWeight: FontWeight.w800,
@@ -155,7 +210,7 @@ class DashboardScreen extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
-              value: 0.6,
+              value: progress,
               backgroundColor: Colors.white.withOpacity(0.2),
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
               minHeight: 8,
@@ -241,7 +296,7 @@ class DashboardScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildStatRow(context, 'Apps Locked', '5', Icons.lock_outline_rounded),
+          _buildStatRow(context, 'Apps Locked', '$_lockedAppsCount', Icons.lock_outline_rounded),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Divider(color: Theme.of(context).dividerColor.withOpacity(0.5)),
@@ -251,7 +306,7 @@ class DashboardScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Divider(color: Theme.of(context).dividerColor.withOpacity(0.5)),
           ),
-          _buildStatRow(context, 'Steps Taken', '3,500', Icons.show_chart_rounded),
+          _buildStatRow(context, 'Steps Taken', '$_steps', Icons.show_chart_rounded),
         ],
       ),
     );

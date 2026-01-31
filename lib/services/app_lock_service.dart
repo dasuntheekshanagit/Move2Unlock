@@ -23,6 +23,9 @@ class AppLockService {
     final prefs = await SharedPreferences.getInstance();
     _lockedPackages = prefs.getStringList('locked_apps') ?? [];
   }
+  
+  // Getter for locked packages
+  List<String> get lockedPackages => _lockedPackages;
 
   Future<void> setLockedApps(List<String> packages) async {
     _lockedPackages = packages;
