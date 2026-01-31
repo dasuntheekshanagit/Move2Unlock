@@ -27,25 +27,37 @@ class MotivationLockApp extends StatelessWidget {
 
   ThemeData _buildLightTheme() {
     final base = ThemeData.light(useMaterial3: true);
+    
+    // Modern Indigo Theme
+    const primaryColor = Color(0xFF6366F1); // Modern Indigo
+    const secondaryColor = Color(0xFFEEF2FF); // Very Light Indigo Background
+    const surfaceColor = Colors.white;
+    const textColor = Color(0xFF1F2937); // Gray 800
+    const textSecondaryColor = Color(0xFF6B7280); // Gray 500
+    const accentColor = Color(0xFF10B981); // Emerald Green
+
     return base.copyWith(
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF2D3436), // Charcoal
-        primary: const Color(0xFF2D3436),
-        secondary: const Color(0xFF6C5CE7), // Soft Purple
-        tertiary: const Color(0xFF00B894), // Mint
-        surface: const Color(0xFFF5F6FA),
-        background: const Color(0xFFF5F6FA),
+        seedColor: primaryColor,
+        primary: primaryColor,
+        secondary: accentColor,
+        tertiary: const Color(0xFFF59E0B), // Amber
+        surface: surfaceColor,
+        background: secondaryColor,
+        onBackground: textColor,
+        onSurface: textColor,
       ),
-      scaffoldBackgroundColor: const Color(0xFFF5F6FA),
+      scaffoldBackgroundColor: secondaryColor,
       cardTheme: CardThemeData(
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        color: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        color: surfaceColor,
         margin: EdgeInsets.zero,
+        shadowColor: Colors.black.withOpacity(0.05),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: const Color(0xFFF3F4F6), // Gray 100
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
@@ -56,75 +68,118 @@ class MotivationLockApp extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF2D3436), width: 1.5),
+          borderSide: const BorderSide(color: primaryColor, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        hintStyle: TextStyle(color: textSecondaryColor),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           elevation: 0,
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
         ),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: secondaryColor,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          color: Color(0xFF2D3436),
+          color: textColor,
           fontSize: 20,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.5,
         ),
-        iconTheme: IconThemeData(color: Color(0xFF2D3436)),
+        iconTheme: IconThemeData(color: textColor),
       ),
       textTheme: base.textTheme.apply(
-        fontFamily: 'WorkSans', // Assuming system font or fallback
-        displayColor: const Color(0xFF2D3436),
-        bodyColor: const Color(0xFF2D3436),
+        fontFamily: 'System', 
+        displayColor: textColor,
+        bodyColor: textColor,
+      ).copyWith(
+        displayLarge: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.bold,
+          letterSpacing: -1.0,
+        ),
+        headlineMedium: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.w700,
+        ),
+        titleLarge: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.5,
+        ),
+        bodyLarge: TextStyle(
+          color: textColor,
+          fontSize: 16,
+          height: 1.5,
+        ),
+        bodyMedium: TextStyle(
+          color: textSecondaryColor,
+          fontSize: 14,
+          height: 1.5,
+        ),
       ),
+      dividerColor: const Color(0xFFE5E7EB),
     );
   }
 
   ThemeData _buildDarkTheme() {
     final base = ThemeData.dark(useMaterial3: true);
+    
+    // Dark Theme Adaptation
+    const primaryColor = Color(0xFF818CF8); // Lighter Indigo
+    const backgroundColor = Color(0xFF111827); // Gray 900
+    const surfaceColor = Color(0xFF1F2937); // Gray 800
+    
     return base.copyWith(
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF6C5CE7),
+        seedColor: primaryColor,
         brightness: Brightness.dark,
-        primary: const Color(0xFF6C5CE7),
-        surface: const Color(0xFF1E1E2C), // Dark Blue-Grey
-        background: const Color(0xFF121212),
+        primary: primaryColor,
+        secondary: const Color(0xFF34D399),
+        surface: surfaceColor,
+        background: backgroundColor,
       ),
-      scaffoldBackgroundColor: const Color(0xFF121212),
+      scaffoldBackgroundColor: backgroundColor,
       cardTheme: CardThemeData(
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        color: const Color(0xFF1E1E2C),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        color: surfaceColor,
         margin: EdgeInsets.zero,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF1E1E2C),
+        fillColor: const Color(0xFF374151), // Gray 700
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF6C5CE7), width: 1.5),
+          borderSide: const BorderSide(color: primaryColor, width: 1.5),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: backgroundColor,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(

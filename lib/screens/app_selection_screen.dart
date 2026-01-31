@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
 import '../services/app_lock_service.dart';
+import 'limit_settings_screen.dart';
 
 class AppSelectionScreen extends StatefulWidget {
   const AppSelectionScreen({super.key});
@@ -23,66 +24,53 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
   }
 
   Future<void> _loadApps() async {
-    await _appLockService.init(); // Ensure service is initialized
+    await _appLockService.init();
     final apps = await _appLockService.getInstalledApps();
-    // Filter out system apps if desired, or keep them. Usually users want to lock user apps.
-    // For now, let's keep all but maybe sort them.
-    apps.sort((a, b) => a.name!.toLowerCase().compareTo(b.name!.toLowerCase()));
     
-    // Load currently locked packages
-    // We need to expose a getter for locked packages in AppLockService or just reload them here
-    // For simplicity, let's assume we start fresh or need to fetch them.
-    // Ideally AppLockService should provide this.
-    // Let's modify AppLockService to expose locked packages or just use shared prefs here directly?
-    // Better to use the service. I'll assume _appLockService has a way or I'll add it.
-    // Since I can't easily modify the service interface in this single step without context, 
-    // I will rely on the service's internal state if exposed, or just re-fetch from prefs in the service.
-    // Wait, I can just use the service to set them later.
-    // Let's just load them from the service if possible.
-    // Actually, let's just use a local list for now and save it on "Save".
-    // But we need to know what was previously selected.
-    // I'll add a method to AppLockService to get locked packages.
+    // Sort apps alphabetically
+    apps.sort((a, b) => (a.name ?? '').toLowerCase().compareTo((b.name ?? '').toLowerCase()));
     
-    setState(() {
-      _installedApps = apps;
-      _isLoading = false;
-    });
+    // Get currently locked packages
+    final locked = _appLockService.lockedPackages;
     
-    // Fetch previously locked apps
-    // Since I can't modify AppLockService right here in this file write, I'll do it in a separate step if needed.
-    // But wait, I can read from SharedPreferences directly here as a fallback or assume the service handles it.
-    // Let's just read from SharedPreferences for now to populate initial state.
-    // Actually, I'll update AppLockService to expose it properly in the next step.
-    // For now, let's just show the installed apps.
+    if (mounted) {
+      setState(() {
+        _installedApps = apps;
+        _lockedPackages = List.from(locked);
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final filteredApps = _installedApps.where((app) {
-      return app.name!.toLowerCase().contains(_searchQuery.toLowerCase());
+      return (app.name ?? '').toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
     return Scaffold(
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: theme.colorScheme.primary))
           : CustomScrollView(
               slivers: [
                 SliverAppBar(
                   expandedHeight: 120.0,
                   floating: false,
                   pinned: true,
+                  backgroundColor: theme.scaffoldBackgroundColor,
                   flexibleSpace: FlexibleSpaceBar(
                     titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
                     title: Text(
                       'Select Apps',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
+                      style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w800,
+                        color: theme.colorScheme.onBackground,
                       ),
                     ),
                   ),
                   leading: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                    icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: theme.colorScheme.onBackground),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -97,11 +85,19 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                       },
                       decoration: InputDecoration(
                         hintText: 'Search apps...',
-                        prefixIcon: const Icon(Icons.search_rounded),
-                        fillColor: Theme.of(context).cardTheme.color,
+                        prefixIcon: Icon(Icons.search_rounded, color: theme.colorScheme.onSurfaceVariant),
+                        fillColor: theme.cardTheme.color,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
                         ),
                       ),
                     ),
@@ -132,15 +128,24 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                                    : Theme.of(context).cardTheme.color,
+                                    ? theme.colorScheme.primary.withOpacity(0.08)
+                                    : theme.cardTheme.color,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: isSelected
-                                      ? Theme.of(context).colorScheme.primary
+                                      ? theme.colorScheme.primary
                                       : Colors.transparent,
-                                  width: 2,
+                                  width: 1.5,
                                 ),
+                                boxShadow: isSelected 
+                                    ? [] 
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.02),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
                               ),
                               child: Row(
                                 children: [
@@ -148,8 +153,8 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? Theme.of(context).colorScheme.primary
-                                          : Theme.of(context).colorScheme.surfaceContainerHighest,
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.surfaceContainerHighest,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: app.icon != null
@@ -158,24 +163,49 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                                             Icons.android,
                                             color: isSelected
                                                 ? Colors.white
-                                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                                                : theme.colorScheme.onSurfaceVariant,
                                             size: 24,
                                           ),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
-                                    child: Text(
-                                      app.name ?? 'Unknown',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          app.name ?? 'Unknown',
+                                          style: theme.textTheme.bodyLarge?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                                          ),
+                                        ),
+                                        if (isSelected)
+                                          Text(
+                                            'Tap to configure limits',
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ),
                                   if (isSelected)
+                                    IconButton(
+                                      icon: Icon(Icons.settings_outlined, color: theme.colorScheme.primary),
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => LimitSettingsScreen(appName: app.name),
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  else
                                     Icon(
-                                      Icons.check_circle_rounded,
-                                      color: Theme.of(context).colorScheme.primary,
+                                      Icons.add_circle_outline_rounded,
+                                      color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
                                     ),
                                 ],
                               ),
@@ -197,12 +227,13 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
         },
         label: const Text(
           'Save Selection',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         icon: const Icon(Icons.check_rounded),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 4,
+        extendedPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );

@@ -17,6 +17,8 @@ class PaywallScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
       body: Stack(
         children: [
@@ -27,8 +29,8 @@ class PaywallScreen extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Theme.of(context).colorScheme.primaryContainer,
-                  Theme.of(context).colorScheme.surface,
+                  theme.colorScheme.primary.withOpacity(0.05),
+                  theme.colorScheme.background,
                 ],
               ),
             ),
@@ -44,38 +46,40 @@ class PaywallScreen extends StatelessWidget {
                       icon: const Icon(Icons.close),
                       onPressed: () => _close(context),
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.black.withOpacity(0.05),
+                        backgroundColor: theme.cardTheme.color,
                         padding: const EdgeInsets.all(8),
                       ),
                     ),
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      color: theme.colorScheme.primary.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.diamond_outlined,
                       size: 64,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                   const SizedBox(height: 32),
                   Text(
                     'Unlock Premium',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    style: theme.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.5,
+                          color: theme.colorScheme.onBackground,
                         ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Supercharge your productivity with unlimited access.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          fontSize: 18,
                         ),
                   ),
                   const SizedBox(height: 48),
@@ -88,9 +92,10 @@ class PaywallScreen extends StatelessWidget {
                     child: FilledButton(
                       onPressed: () => _close(context),
                       style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: theme.colorScheme.primary,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 18),
+                        elevation: 0,
                       ),
                       child: const Text(
                         'Start 7-Day Free Trial',
@@ -101,8 +106,8 @@ class PaywallScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     'Then \$4.99/month. Cancel anytime.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
                         ),
                   ),
                 ],
@@ -115,27 +120,28 @@ class PaywallScreen extends StatelessWidget {
   }
 
   Widget _buildFeatureRow(BuildContext context, String text, IconData icon) {
+    final theme = Theme.of(context);
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+              color: theme.colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
-              size: 20,
-              color: Theme.of(context).colorScheme.primary,
+              size: 22,
+              color: theme.colorScheme.primary,
             ),
           ),
           const SizedBox(width: 16),
           Text(
             text,
-            style: const TextStyle(
-              fontSize: 16,
+            style: theme.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
