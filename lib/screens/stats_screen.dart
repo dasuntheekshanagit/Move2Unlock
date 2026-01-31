@@ -15,6 +15,7 @@ class StatsScreen extends StatelessWidget {
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w800,
             color: theme.colorScheme.onBackground,
+            fontSize: 22,
           ),
         ),
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -24,7 +25,7 @@ class StatsScreen extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -35,7 +36,7 @@ class StatsScreen extends StatelessWidget {
               Icons.directions_walk_rounded,
               theme.colorScheme.primary,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             _buildStatCard(
               theme,
               'Time Saved',
@@ -43,7 +44,7 @@ class StatsScreen extends StatelessWidget {
               Icons.hourglass_empty_rounded,
               theme.colorScheme.secondary,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             _buildStatCard(
               theme,
               'Apps Unlocked',
@@ -51,25 +52,26 @@ class StatsScreen extends StatelessWidget {
               Icons.lock_open_rounded,
               theme.colorScheme.tertiary,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             Text(
               'Weekly Activity',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
+                fontSize: 16,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Container(
-              height: 200,
-              padding: const EdgeInsets.all(24),
+              height: 180,
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: theme.cardTheme.color,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
@@ -81,18 +83,19 @@ class StatsScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Container(
-                        width: 16,
-                        height: 150 * value,
+                        width: 12,
+                        height: 120 * value,
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primary.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
                         'M', // Placeholder for day
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          fontSize: 10,
                         ),
                       ),
                     ],
@@ -109,7 +112,7 @@ class StatsScreen extends StatelessWidget {
   Widget _buildPopupMenu(BuildContext context) {
     return PopupMenuButton<String>(
       icon: Icon(Icons.more_vert_rounded, color: Theme.of(context).colorScheme.onBackground),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) {
         if (value == 'profile') {
           Navigator.push(
@@ -122,25 +125,28 @@ class StatsScreen extends StatelessWidget {
         const PopupMenuItem<String>(
           value: 'profile',
           child: ListTile(
-            leading: Icon(Icons.person_outline),
-            title: Text('Profile'),
+            leading: Icon(Icons.person_outline, size: 20),
+            title: Text('Profile', style: TextStyle(fontSize: 14)),
             contentPadding: EdgeInsets.zero,
+            dense: true,
           ),
         ),
         const PopupMenuItem<String>(
           value: 'settings',
           child: ListTile(
-            leading: Icon(Icons.settings_outlined),
-            title: Text('Settings'),
+            leading: Icon(Icons.settings_outlined, size: 20),
+            title: Text('Settings', style: TextStyle(fontSize: 14)),
             contentPadding: EdgeInsets.zero,
+            dense: true,
           ),
         ),
         const PopupMenuItem<String>(
           value: 'help',
           child: ListTile(
-            leading: Icon(Icons.help_outline),
-            title: Text('Help & Support'),
+            leading: Icon(Icons.help_outline, size: 20),
+            title: Text('Help & Support', style: TextStyle(fontSize: 14)),
             contentPadding: EdgeInsets.zero,
+            dense: true,
           ),
         ),
       ],
@@ -149,27 +155,27 @@ class StatsScreen extends StatelessWidget {
 
   Widget _buildStatCard(ThemeData theme, String title, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 28, color: color),
+            child: Icon(icon, size: 24, color: color),
           ),
           const SizedBox(width: 16),
           Column(
@@ -180,6 +186,7 @@ class StatsScreen extends StatelessWidget {
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withOpacity(0.6),
                   fontWeight: FontWeight.w500,
+                  fontSize: 13,
                 ),
               ),
               Text(
@@ -187,6 +194,7 @@ class StatsScreen extends StatelessWidget {
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: theme.colorScheme.onSurface,
+                  fontSize: 20,
                 ),
               ),
             ],

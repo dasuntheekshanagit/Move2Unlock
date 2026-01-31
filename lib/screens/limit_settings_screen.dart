@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LimitSettingsScreen extends StatefulWidget {
   final String? appName;
@@ -15,6 +16,42 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
   double _unlockDuration = 15; // minutes
   bool _notificationsEnabled = true;
   bool _strictMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keyPrefix = widget.appName != null ? 'app_${widget.appName}_' : 'global_';
+    
+    setState(() {
+      _stepsToUnlock = prefs.getDouble('${keyPrefix}steps') ?? 1000;
+      _unlockType = prefs.getString('${keyPrefix}type') ?? 'Time Limit';
+      _unlockDuration = prefs.getDouble('${keyPrefix}duration') ?? 15;
+      _notificationsEnabled = prefs.getBool('${keyPrefix}notifications') ?? true;
+      _strictMode = prefs.getBool('${keyPrefix}strict') ?? false;
+    });
+  }
+
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keyPrefix = widget.appName != null ? 'app_${widget.appName}_' : 'global_';
+    
+    await prefs.setDouble('${keyPrefix}steps', _stepsToUnlock);
+    await prefs.setString('${keyPrefix}type', _unlockType);
+    await prefs.setDouble('${keyPrefix}duration', _unlockDuration);
+    await prefs.setBool('${keyPrefix}notifications', _notificationsEnabled);
+    await prefs.setBool('${keyPrefix}strict', _strictMode);
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Settings saved')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,11 +82,8 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
             ),
             actions: [
               IconButton(
-                icon: Icon(Icons.more_vert_rounded, color: theme.colorScheme.onBackground),
-                onPressed: () {
-                  // Show app configurations menu
-                  _showAppConfigMenu(context);
-                },
+                icon: Icon(Icons.save_rounded, color: theme.colorScheme.primary),
+                onPressed: _saveSettings,
               ),
             ],
           ),
@@ -59,11 +93,9 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (widget.appName != null) ...[
-                    _buildSectionHeader('App Configuration'),
-                    _buildConfigCard(theme),
-                    const SizedBox(height: 32),
-                  ],
+                  _buildSectionHeader('App Configuration'),
+                  _buildConfigCard(theme),
+                  const SizedBox(height: 32),
                   
                   _buildSectionHeader('Unlock Requirement'),
                   Container(
@@ -238,7 +270,7 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.pop(context),
+        onPressed: _saveSettings,
         label: const Text(
           'Save Settings',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -312,60 +344,6 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  void _showAppConfigMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ListTile(
-                  leading: const Icon(Icons.notifications_outlined),
-                  title: const Text('Notification Settings'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    // Handle notification settings
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.timer_off_outlined),
-                  title: const Text('Reset Usage Stats'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    // Handle reset
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.delete_outline, color: Colors.red),
-                  title: const Text('Remove Limits', style: TextStyle(color: Colors.red)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    // Handle remove
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

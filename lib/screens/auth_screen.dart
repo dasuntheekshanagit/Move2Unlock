@@ -50,25 +50,26 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 40),
                     // Logo
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primary.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.lock_clock_rounded,
-                        size: 32,
+                        size: 28,
                         color: theme.colorScheme.primary,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     Text(
                       'Motivation Lock',
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.displaySmall?.copyWith(
+                      style: theme.textTheme.displayLarge?.copyWith(
+                        fontSize: 28,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.5,
                         color: theme.colorScheme.onBackground,
@@ -82,14 +83,14 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                         color: theme.colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
                     
                     // Custom Tab Switcher
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         children: [
@@ -113,7 +114,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       ),
                     ),
                     
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
                     
                     // Form
                     AnimatedSwitcher(
@@ -123,9 +124,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                         : _buildSignUpForm(theme, isDark),
                     ),
                     
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
                     _buildSocialLogin(theme, isDark),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
@@ -146,10 +147,10 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? theme.colorScheme.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -164,7 +165,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           title,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
             color: isSelected 
                 ? theme.colorScheme.primary 
                 : theme.colorScheme.onSurface.withOpacity(0.6),
@@ -184,7 +186,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           icon: Icons.email_outlined,
           theme: theme,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         _buildTextField(
           controller: _passwordController,
           hint: 'Password',
@@ -192,7 +194,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           isPassword: true,
           theme: theme,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
@@ -205,23 +207,23 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             ),
             child: const Text(
               'Forgot Password?',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
           child: FilledButton(
             onPressed: _submit,
             style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 14),
               shadowColor: theme.colorScheme.primary.withOpacity(0.4),
               elevation: 4,
             ),
             child: const Text(
               'Sign In',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
           ),
         ),
@@ -239,14 +241,14 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           icon: Icons.person_outline,
           theme: theme,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         _buildTextField(
           controller: _emailController,
           hint: 'Email address',
           icon: Icons.email_outlined,
           theme: theme,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         _buildTextField(
           controller: _passwordController,
           hint: 'Password',
@@ -254,19 +256,19 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           isPassword: true,
           theme: theme,
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
           child: FilledButton(
             onPressed: _submit,
             style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 14),
               shadowColor: theme.colorScheme.primary.withOpacity(0.4),
               elevation: 4,
             ),
             child: const Text(
               'Create Account',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
           ),
         ),
@@ -284,7 +286,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     return Container(
       decoration: BoxDecoration(
         color: theme.inputDecorationTheme.fillColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withOpacity(0.1),
         ),
@@ -295,14 +297,15 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         style: TextStyle(
           color: theme.colorScheme.onSurface,
           fontWeight: FontWeight.w500,
+          fontSize: 14,
         ),
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon: Icon(icon, size: 20, color: theme.colorScheme.onSurface.withOpacity(0.4)),
+          prefixIcon: Icon(icon, size: 18, color: theme.colorScheme.onSurface.withOpacity(0.4)),
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
@@ -320,7 +323,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 'OR CONTINUE WITH',
                 style: TextStyle(
                   color: theme.colorScheme.onSurface.withOpacity(0.4),
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
                 ),
@@ -329,14 +332,14 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             Expanded(child: Divider(color: theme.dividerColor)),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildSocialButton(Icons.apple, theme, isDark),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             _buildSocialButton(Icons.g_mobiledata, theme, isDark),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             _buildSocialButton(Icons.facebook, theme, isDark),
           ],
         ),
@@ -347,21 +350,21 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   Widget _buildSocialButton(IconData icon, ThemeData theme, bool isDark) {
     return InkWell(
       onTap: () {},
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        width: 56,
-        height: 56,
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
           border: Border.all(
             color: theme.dividerColor,
             width: 1.5,
           ),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           color: theme.cardTheme.color,
         ),
         child: Icon(
           icon,
-          size: 24,
+          size: 22,
           color: theme.colorScheme.onSurface,
         ),
       ),

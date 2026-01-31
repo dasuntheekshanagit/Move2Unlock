@@ -1,7 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  bool _isEditing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _nameController.text = prefs.getString('user_name') ?? 'User';
+      _emailController.text = prefs.getString('user_email') ?? 'user@example.com';
+    });
+  }
+
+  Future<void> _saveProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_name', _nameController.text);
+    await prefs.setString('user_email', _emailController.text);
+    setState(() {
+      _isEditing = false;
+    });
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated')),
+      );
+    }
+  }
+
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Clear all data on logout for now
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const AuthScreen()),
+        (route) => false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +75,25 @@ class ProfileScreen extends StatelessWidget {
         ),
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: theme.colorScheme.onBackground),
+          onPressed: () => Navigator.pop(context),
+        ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.more_vert_rounded, color: theme.colorScheme.onBackground),
-            onPressed: () {
-              _showAppConfigMenu(context);
-            },
-          ),
+          if (_isEditing)
+            IconButton(
+              icon: Icon(Icons.check_rounded, color: theme.colorScheme.primary),
+              onPressed: _saveProfile,
+            )
+          else
+            IconButton(
+              icon: Icon(Icons.edit_rounded, color: theme.colorScheme.onBackground),
+              onPressed: () {
+                setState(() {
+                  _isEditing = true;
+                });
+              },
+            ),
         ],
       ),
       body: SingleChildScrollView(
@@ -52,24 +121,14 @@ class ProfileScreen extends StatelessWidget {
                       color: theme.colorScheme.primary,
                     ),
                   ),
+                  const SizedBox(height: 24),
+                  _buildEditableField(theme, 'Name', _nameController, Icons.person_outline),
                   const SizedBox(height: 16),
-                  Text(
-                    'Dasun',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    'dasun@example.com',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    ),
-                  ),
+                  _buildEditableField(theme, 'Email', _emailController, Icons.email_outlined),
                 ],
               ),
             ),
             const SizedBox(height: 40),
-            _buildProfileOption(theme, 'Edit Profile', Icons.edit_outlined),
             _buildProfileOption(theme, 'Change Password', Icons.lock_outline),
             _buildProfileOption(theme, 'Notifications', Icons.notifications_outlined),
             _buildProfileOption(theme, 'Privacy Policy', Icons.privacy_tip_outlined),
@@ -77,9 +136,7 @@ class ProfileScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: () {
-                  // Handle logout
-                },
+                onPressed: _logout,
                 style: FilledButton.styleFrom(
                   backgroundColor: theme.colorScheme.error.withOpacity(0.1),
                   foregroundColor: theme.colorScheme.error,
@@ -93,6 +150,38 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditableField(ThemeData theme, String label, TextEditingController controller, IconData icon) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        enabled: _isEditing,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: _isEditing ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withOpacity(0.7),
+        ),
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon, size: 20, color: theme.colorScheme.onSurface.withOpacity(0.4)),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
@@ -132,50 +221,6 @@ class ProfileScreen extends StatelessWidget {
         ),
         onTap: () {},
       ),
-    );
-  }
-
-  void _showAppConfigMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ListTile(
-                  leading: const Icon(Icons.settings_outlined),
-                  title: const Text('General Settings'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.help_outline),
-                  title: const Text('Help & Support'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

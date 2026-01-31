@@ -8,15 +8,22 @@ class PermissionService {
       final status = await Permission.activityRecognition.request();
       return status.isGranted;
     }
-    // iOS handles this differently, usually via Info.plist and automatic prompts on first use of Pedometer
     return true; 
+  }
+
+  Future<bool> checkActivityRecognitionPermission() async {
+    if (Platform.isAndroid) {
+      final status = await Permission.activityRecognition.status;
+      return status.isGranted;
+    }
+    return true;
   }
 
   Future<bool> checkUsageStatsPermission() async {
     if (Platform.isAndroid) {
       return (await UsageStats.checkUsagePermission()) ?? false;
     }
-    return true; // Not applicable/available in the same way on iOS for general app locking
+    return true; 
   }
 
   Future<void> requestUsageStatsPermission() async {
@@ -33,6 +40,14 @@ class PermissionService {
   Future<bool> requestOverlayPermission() async {
       if (Platform.isAndroid) {
           final status = await Permission.systemAlertWindow.request();
+          return status.isGranted;
+      }
+      return true;
+  }
+
+  Future<bool> checkOverlayPermission() async {
+      if (Platform.isAndroid) {
+          final status = await Permission.systemAlertWindow.status;
           return status.isGranted;
       }
       return true;

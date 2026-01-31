@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
+import 'package:installed_apps/installed_apps.dart';
 import '../services/app_lock_service.dart';
 import 'limit_settings_screen.dart';
 
@@ -55,7 +56,7 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
           : CustomScrollView(
               slivers: [
                 SliverAppBar(
-                  expandedHeight: 120.0,
+                  expandedHeight: 100.0,
                   floating: false,
                   pinned: true,
                   backgroundColor: theme.scaffoldBackgroundColor,
@@ -66,6 +67,7 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: theme.colorScheme.onBackground,
+                        fontSize: 22,
                       ),
                     ),
                   ),
@@ -76,35 +78,37 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                     child: TextField(
                       onChanged: (value) {
                         setState(() {
                           _searchQuery = value;
                         });
                       },
+                      style: const TextStyle(fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Search apps...',
-                        prefixIcon: Icon(Icons.search_rounded, color: theme.colorScheme.onSurfaceVariant),
+                        prefixIcon: Icon(Icons.search_rounded, size: 20, color: theme.colorScheme.onSurfaceVariant),
                         fillColor: theme.cardTheme.color,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
                         ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
                     ),
                   ),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
@@ -112,7 +116,7 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                         final isSelected = _lockedPackages.contains(app.packageName);
 
                         return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.only(bottom: 10),
                           child: InkWell(
                             onTap: () {
                               setState(() {
@@ -123,14 +127,14 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                                 }
                               });
                             },
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(16),
                             child: Container(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? theme.colorScheme.primary.withOpacity(0.08)
                                     : theme.cardTheme.color,
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: isSelected
                                       ? theme.colorScheme.primary
@@ -142,7 +146,7 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                                     : [
                                         BoxShadow(
                                           color: Colors.black.withOpacity(0.02),
-                                          blurRadius: 8,
+                                          blurRadius: 6,
                                           offset: const Offset(0, 2),
                                         ),
                                       ],
@@ -150,24 +154,24 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                               child: Row(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.all(10),
+                                    padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                       color: isSelected
                                           ? theme.colorScheme.primary
                                           : theme.colorScheme.surfaceContainerHighest,
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: app.icon != null
-                                        ? Image.memory(app.icon!, width: 24, height: 24)
+                                        ? Image.memory(app.icon!, width: 20, height: 20)
                                         : Icon(
                                             Icons.android,
                                             color: isSelected
                                                 ? Colors.white
                                                 : theme.colorScheme.onSurfaceVariant,
-                                            size: 24,
+                                            size: 20,
                                           ),
                                   ),
-                                  const SizedBox(width: 16),
+                                  const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,6 +181,7 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                                           style: theme.textTheme.bodyLarge?.copyWith(
                                             fontWeight: FontWeight.w600,
                                             color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                                            fontSize: 14,
                                           ),
                                         ),
                                         if (isSelected)
@@ -192,7 +197,9 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                                   ),
                                   if (isSelected)
                                     IconButton(
-                                      icon: Icon(Icons.settings_outlined, color: theme.colorScheme.primary),
+                                      icon: Icon(Icons.settings_outlined, size: 20, color: theme.colorScheme.primary),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
                                       onPressed: () {
                                         Navigator.push(
                                           context,
@@ -205,6 +212,7 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                                   else
                                     Icon(
                                       Icons.add_circle_outline_rounded,
+                                      size: 20,
                                       color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
                                     ),
                                 ],
@@ -227,13 +235,13 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
         },
         label: const Text(
           'Save Selection',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
-        icon: const Icon(Icons.check_rounded),
+        icon: const Icon(Icons.check_rounded, size: 20),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 4,
-        extendedPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        extendedPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );

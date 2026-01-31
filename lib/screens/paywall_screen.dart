@@ -1,18 +1,42 @@
 import 'package:flutter/material.dart';
 import 'permission_screen.dart';
+import 'dashboard_screen.dart';
+import '../services/permission_service.dart';
 
 class PaywallScreen extends StatelessWidget {
   const PaywallScreen({super.key});
 
-  void _close(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const PermissionScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
+  Future<void> _close(BuildContext context) async {
+    final permissionService = PermissionService();
+    
+    // Check if all permissions are granted
+    bool usage = await permissionService.checkUsageStatsPermission();
+    bool activity = await permissionService.checkActivityRecognitionPermission();
+    bool overlay = await permissionService.checkOverlayPermission();
+    
+    if (context.mounted) {
+      if (usage && activity && overlay) {
+        // All granted, go to dashboard
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => const DashboardScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
+        );
+      } else {
+        // Not granted, go to permission screen
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => const PermissionScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
+        );
+      }
+    }
   }
 
   @override

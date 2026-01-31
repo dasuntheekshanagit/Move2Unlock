@@ -9,7 +9,7 @@ class PermissionScreen extends StatefulWidget {
   State<PermissionScreen> createState() => _PermissionScreenState();
 }
 
-class _PermissionScreenState extends State<PermissionScreen> {
+class _PermissionScreenState extends State<PermissionScreen> with WidgetsBindingObserver {
   final PermissionService _permissionService = PermissionService();
   bool _activityPermission = false;
   bool _usageStatsPermission = false;
@@ -18,14 +18,35 @@ class _PermissionScreenState extends State<PermissionScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkPermissions();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkPermissions();
+    }
   }
 
   Future<void> _checkPermissions() async {
     bool usage = await _permissionService.checkUsageStatsPermission();
-    setState(() {
-      _usageStatsPermission = usage;
-    });
+    bool activity = await _permissionService.checkActivityRecognitionPermission();
+    bool overlay = await _permissionService.checkOverlayPermission();
+    
+    if (mounted) {
+      setState(() {
+        _usageStatsPermission = usage;
+        _activityPermission = activity;
+        _overlayPermission = overlay;
+      });
+    }
   }
 
   Future<void> _requestActivity() async {
@@ -37,11 +58,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
 
   Future<void> _requestUsage() async {
     await _permissionService.requestUsageStatsPermission();
-    await Future.delayed(const Duration(seconds: 1)); 
-    bool granted = await _permissionService.checkUsageStatsPermission();
-    setState(() {
-      _usageStatsPermission = granted;
-    });
+    // Wait for user to return
   }
   
   Future<void> _requestOverlay() async {
@@ -52,19 +69,28 @@ class _PermissionScreenState extends State<PermissionScreen> {
   }
 
   void _continue() {
-    if (_activityPermission && _usageStatsPermission && _overlayPermission) {
+    if (_usageStatsPermission && _activityPermission && _overlayPermission) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please grant all permissions to continue.'),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      // Try to check again in case state is stale
+      _checkPermissions().then((_) {
+          if (_usageStatsPermission && _activityPermission && _overlayPermission) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const DashboardScreen()),
+              );
+          } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Please grant all permissions to continue.'),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+              );
+          }
+      });
     }
   }
 
@@ -75,41 +101,45 @@ class _PermissionScreenState extends State<PermissionScreen> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
               // Header
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.shield_outlined,
-                  size: 32,
+                  size: 28,
                   color: theme.colorScheme.primary,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               Text(
                 'Setup Permissions',
-                style: theme.textTheme.headlineMedium?.copyWith(
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: theme.colorScheme.onBackground,
+                  fontSize: 22,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 'To help you stay focused and track your progress, Motivation Lock needs access to a few things.',
-                style: theme.textTheme.bodyLarge?.copyWith(
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurface.withOpacity(0.7),
                   height: 1.5,
+                  fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
               
               // Permission Tiles
               Expanded(
@@ -123,7 +153,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
                       _activityPermission,
                       _requestActivity,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     _buildPermissionTile(
                       context,
                       'Usage Access',
@@ -132,7 +162,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
                       _usageStatsPermission,
                       _requestUsage,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     _buildPermissionTile(
                       context,
                       'Display Over Apps',
@@ -146,19 +176,19 @@ class _PermissionScreenState extends State<PermissionScreen> {
               ),
               
               // Bottom Action
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: _continue,
                   style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                     shadowColor: theme.colorScheme.primary.withOpacity(0.4),
-                    elevation: 8,
+                    elevation: 4,
                   ),
                   child: const Text(
                     'Continue to Dashboard',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -185,7 +215,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
         color: isGranted 
             ? theme.colorScheme.primary.withOpacity(0.05) 
             : theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isGranted 
               ? theme.colorScheme.primary.withOpacity(0.5) 
@@ -194,9 +224,9 @@ class _PermissionScreenState extends State<PermissionScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -204,25 +234,25 @@ class _PermissionScreenState extends State<PermissionScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: isGranted ? null : onTap,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: isGranted 
                         ? theme.colorScheme.primary 
                         : theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     isGranted ? Icons.check_rounded : icon, 
                     color: isGranted 
                         ? Colors.white 
                         : theme.colorScheme.onSurfaceVariant,
-                    size: 24,
+                    size: 20,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -235,14 +265,16 @@ class _PermissionScreenState extends State<PermissionScreen> {
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: isGranted ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                          fontSize: 15,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface.withOpacity(0.6),
                           height: 1.3,
+                          fontSize: 12,
                         ),
                       ),
                     ],
@@ -251,7 +283,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
                 if (!isGranted)
                   Icon(
                     Icons.arrow_forward_ios_rounded,
-                    size: 16,
+                    size: 14,
                     color: theme.colorScheme.onSurface.withOpacity(0.3),
                   ),
               ],
