@@ -16,20 +16,20 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final StepService _stepService = StepService();
   final AppLockService _appLockService = AppLockService();
-  
+
   int _steps = 0;
   int _selectedIndex = 0;
-  
+
   @override
   void initState() {
     super.initState();
     _initServices();
   }
-  
+
   Future<void> _initServices() async {
     await _stepService.init();
     await _appLockService.init();
-    
+
     _stepService.stepStream.listen((steps) {
       if (mounted) {
         setState(() {
@@ -37,17 +37,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       }
     });
-    
+
     // Initial load
     setState(() {
-        _steps = _stepService.getCurrentSteps();
+      _steps = _stepService.getCurrentSteps();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
@@ -92,26 +92,97 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildHomeTab(ThemeData theme) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Dashboard',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: theme.colorScheme.onBackground,
-            fontSize: 22,
-          ),
-        ),
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        actions: [
-          _buildPopupMenu(context),
-        ],
-      ),
       body: CustomScrollView(
         slivers: [
+          // Custom Modern Header - Unified App Branding
+          SliverAppBar(
+            expandedHeight: 100,
+            floating: false,
+            pinned: true,
+            backgroundColor: theme.scaffoldBackgroundColor,
+            elevation: 0,
+            flexibleSpace: FlexibleSpaceBar(
+              collapseMode: CollapseMode.parallax,
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      theme.colorScheme.primary.withOpacity(0.08),
+                      theme.colorScheme.secondary.withOpacity(0.03),
+                    ],
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 24,
+                    right: 24,
+                    top: 16,
+                    bottom: 12,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      theme.colorScheme.primary,
+                                      theme.colorScheme.primary.withOpacity(
+                                        0.8,
+                                      ),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: theme.colorScheme.primary
+                                          .withOpacity(0.2),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.lock_clock_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Motivation Lock',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 18,
+                                  color: theme.colorScheme.onBackground,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      _buildPopupMenu(context),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -134,7 +205,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildPopupMenu(BuildContext context) {
     return PopupMenuButton<String>(
-      icon: Icon(Icons.more_vert_rounded, color: Theme.of(context).colorScheme.onBackground),
+      icon: Icon(
+        Icons.more_vert_rounded,
+        color: Theme.of(context).colorScheme.onBackground,
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) {
         if (value == 'profile') {
@@ -184,52 +258,83 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildGreetingCard(ThemeData theme) {
     // Mock date
     final now = DateTime.now();
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    final dateStr = '${days[now.weekday % 7].toUpperCase()}, ${months[now.month - 1].toUpperCase()} ${now.day}';
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final days = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
+    final dateStr =
+        '${days[now.weekday % 7]}, ${months[now.month - 1]} ${now.day}';
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.primary.withOpacity(0.08),
+            theme.colorScheme.primary.withOpacity(0.02),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.primary.withOpacity(0.1),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.wb_sunny_outlined, size: 14, color: theme.colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                dateStr,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.primary,
-                  letterSpacing: 1,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
           Text(
-            'Good Morning,',
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w400,
-              fontFamily: 'Serif',
-              color: theme.colorScheme.onSurface,
-              fontSize: 22,
+            dateStr,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.primary,
+              letterSpacing: 0.5,
             ),
           ),
-          Text(
-            'Dasun.',
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.italic,
-              fontFamily: 'Serif',
-              color: theme.colorScheme.primary,
-              fontSize: 22,
+          const SizedBox(height: 8),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Welcome back, ',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 20,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                TextSpan(
+                  text: 'Dasun',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 20,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -243,28 +348,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (progress > 1.0) progress = 1.0;
 
     return Container(
-      height: 180,
-      padding: const EdgeInsets.all(20),
+      height: 200,
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary,
-        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.primary,
+            theme.colorScheme.primary.withOpacity(0.8),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withOpacity(0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: theme.colorScheme.primary.withOpacity(0.25),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Stack(
         children: [
           Positioned(
-            right: -16,
-            top: -16,
+            right: -20,
+            top: -20,
             child: Icon(
               Icons.directions_walk,
-              size: 120,
-              color: Colors.white.withOpacity(0.1),
+              size: 140,
+              color: Colors.white.withOpacity(0.08),
             ),
           ),
           Column(
@@ -275,68 +387,88 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
                     ),
-                    child: const Row(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
                       children: [
                         Icon(Icons.bolt_rounded, color: Colors.white, size: 14),
-                        SizedBox(width: 4),
-                        Text(
+                        const SizedBox(width: 4),
+                        const Text(
                           'Daily Goal',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 11),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  Icon(Icons.more_horiz, color: Colors.white.withOpacity(0.7), size: 20),
-                ],
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '$_steps',
-                    style: const TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      height: 1,
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 6, left: 6),
-                    child: Text(
-                      '/ 5000',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white70,
-                      ),
-                    ),
+                  Icon(
+                    Icons.more_horiz,
+                    color: Colors.white.withOpacity(0.6),
+                    size: 22,
                   ),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        '$_steps',
+                        style: const TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          height: 1,
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8, bottom: 8),
+                        child: Text(
+                          '/ 5K',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      backgroundColor: Colors.black.withOpacity(0.1),
-                      valueColor: const AlwaysStoppedAnimation(Colors.white),
-                      minHeight: 5,
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      height: 8,
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        backgroundColor: Colors.black.withOpacity(0.15),
+                        valueColor: const AlwaysStoppedAnimation(Colors.white),
+                        minHeight: 8,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
-                    '${(progress * 100).toInt()}% completed',
+                    '${(progress * 100).toInt()}% of daily goal',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 11,
+                      color: Colors.white.withOpacity(0.75),
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -351,19 +483,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildSmallStatGraph(ThemeData theme) {
     final data = [0.3, 0.5, 0.4, 0.7, 0.6, 0.8, 0.5];
-    
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(
+          color: theme.colorScheme.primary.withOpacity(0.05),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,47 +507,66 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Activity Trend',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                ),
-              ),
-              Text(
-                'Last 7 Days',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.5),
-                  fontSize: 11,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Weekly Activity',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Last 7 days performance',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           SizedBox(
-            height: 80,
+            height: 120,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: data.map((value) {
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(data.length, (index) {
+                final isToday = index == data.length - 1;
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 10,
-                      height: 80 * value,
+                      width: 14,
+                      height: 80 * data[index],
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(5),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            theme.colorScheme.primary,
+                            theme.colorScheme.primary.withOpacity(0.6),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(isToday ? 8 : 6),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.onSurface.withOpacity(0.1),
-                        shape: BoxShape.circle,
+                    const SizedBox(height: 8),
+                    Text(
+                      ['M', 'T', 'W', 'T', 'F', 'S', 'S'][index],
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: isToday
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface.withOpacity(0.4),
                       ),
                     ),
                   ],
@@ -425,39 +580,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildMotivationCard(ThemeData theme) {
+    // Use different color - emerald/green theme
+    const Color accentColor = Color(0xFF10B981);
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF5F6),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFFFE4E6)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accentColor.withOpacity(0.12),
+            accentColor.withOpacity(0.03),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: accentColor.withOpacity(0.3), width: 1),
       ),
       child: Column(
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome, size: 18, color: theme.colorScheme.primary),
-              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [accentColor, accentColor.withOpacity(0.8)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: accentColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.lightbulb_rounded,
+                  size: 18,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 10),
               Text(
-                'SPARK A THOUGHT',
-                style: TextStyle(
-                  fontSize: 11,
+                'Daily Inspiration',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.primary,
-                  letterSpacing: 1,
+                  color: accentColor,
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          const Text(
+          const SizedBox(height: 16),
+          Text(
             '"The only way to do great work is to love what you do."',
-            style: TextStyle(
+            style: theme.textTheme.bodyLarge?.copyWith(
               fontSize: 16,
               fontStyle: FontStyle.italic,
-              fontFamily: 'Serif',
-              height: 1.4,
-              color: Color(0xFF2D2D2D),
+              height: 1.5,
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '— Steve Jobs',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
           ),

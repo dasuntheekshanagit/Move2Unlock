@@ -8,7 +8,8 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateMixin {
+class _AuthScreenState extends State<AuthScreen>
+    with SingleTickerProviderStateMixin {
   bool _isSignIn = true;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -25,7 +26,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   void _submit() {
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const PaywallScreen(),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const PaywallScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
         },
@@ -37,8 +39,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF1A1A1A) : Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -51,17 +54,28 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 40),
-                    // Logo
+                    // Logo with gradient background
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withOpacity(0.1),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
+                        ),
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF6366F1).withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.lock_clock_rounded,
                         size: 28,
-                        color: theme.colorScheme.primary,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -72,7 +86,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.5,
-                        color: theme.colorScheme.onBackground,
+                        color: isDark ? Colors.white : const Color(0xFF1A1A1A),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -80,17 +94,28 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       'Turn your steps into screen time.',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),
                     ),
                     const SizedBox(height: 32),
-                    
-                    // Custom Tab Switcher
+
+                    // Custom Tab Switcher with gradient
                     Container(
-                      padding: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(12),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            const Color(0xFF6366F1).withOpacity(0.08),
+                            const Color(0xFF6366F1).withOpacity(0.02),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: const Color(0xFF6366F1).withOpacity(0.2),
+                          width: 1,
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -113,17 +138,17 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Form
                     AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
-                      child: _isSignIn 
-                        ? _buildSignInForm(theme, isDark) 
-                        : _buildSignUpForm(theme, isDark),
+                      child: _isSignIn
+                          ? _buildSignInForm(theme, isDark)
+                          : _buildSignUpForm(theme, isDark),
                     ),
-                    
+
                     const SizedBox(height: 24),
                     _buildSocialLogin(theme, isDark),
                     const SizedBox(height: 32),
@@ -143,19 +168,27 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     required VoidCallback onTap,
     required ThemeData theme,
   }) {
+    const selectedColor = Color(0xFF6366F1);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? theme.colorScheme.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
+          gradient: isSelected
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [selectedColor, Color(0xFF4F46E5)],
+                )
+              : null,
+          color: isSelected ? null : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 4,
+                    color: selectedColor.withOpacity(0.15),
+                    blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ]
@@ -165,10 +198,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           title,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             fontSize: 14,
-            color: isSelected 
-                ? theme.colorScheme.primary 
+            letterSpacing: 0.3,
+            color: isSelected
+                ? Colors.white
                 : theme.colorScheme.onSurface.withOpacity(0.6),
           ),
         ),
@@ -200,7 +234,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           child: TextButton(
             onPressed: () {},
             style: TextButton.styleFrom(
-              foregroundColor: theme.colorScheme.primary,
+              foregroundColor: const Color(0xFF6366F1),
               padding: EdgeInsets.zero,
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -212,18 +246,39 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           ),
         ),
         const SizedBox(height: 20),
-        SizedBox(
+        Container(
           width: double.infinity,
-          child: FilledButton(
-            onPressed: _submit,
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shadowColor: theme.colorScheme.primary.withOpacity(0.4),
-              elevation: 4,
+          height: 50,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
             ),
-            child: const Text(
-              'Sign In',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF6366F1).withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _submit,
+              borderRadius: BorderRadius.circular(12),
+              child: const Center(
+                child: Text(
+                  'Sign In',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -257,18 +312,39 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           theme: theme,
         ),
         const SizedBox(height: 20),
-        SizedBox(
+        Container(
           width: double.infinity,
-          child: FilledButton(
-            onPressed: _submit,
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shadowColor: theme.colorScheme.primary.withOpacity(0.4),
-              elevation: 4,
+          height: 50,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
             ),
-            child: const Text(
-              'Create Account',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF6366F1).withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _submit,
+              borderRadius: BorderRadius.circular(12),
+              child: const Center(
+                child: Text(
+                  'Create Account',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -283,29 +359,49 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     required ThemeData theme,
     bool isPassword = false,
   }) {
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: theme.inputDecorationTheme.fillColor,
-        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFF6366F1).withOpacity(0.06),
+            const Color(0xFF6366F1).withOpacity(0.02),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+          color: const Color(0xFF6366F1).withOpacity(0.15),
+          width: 1.5,
         ),
       ),
       child: TextField(
         controller: controller,
         obscureText: isPassword,
         style: TextStyle(
-          color: theme.colorScheme.onSurface,
+          color: isDark ? Colors.white : const Color(0xFF1A1A1A),
           fontWeight: FontWeight.w500,
           fontSize: 14,
         ),
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon: Icon(icon, size: 18, color: theme.colorScheme.onSurface.withOpacity(0.4)),
+          hintStyle: TextStyle(
+            color: isDark ? Colors.grey[500] : Colors.grey[600],
+            fontWeight: FontWeight.w400,
+          ),
+          prefixIcon: Icon(
+            icon,
+            size: 18,
+            color: const Color(0xFF6366F1).withOpacity(0.6),
+          ),
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
         ),
       ),
     );
@@ -350,23 +446,26 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   Widget _buildSocialButton(IconData icon, ThemeData theme, bool isDark) {
     return InkWell(
       onTap: () {},
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       child: Container(
-        width: 48,
-        height: 48,
+        width: 52,
+        height: 52,
         decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF6366F1).withOpacity(0.08),
+              const Color(0xFF6366F1).withOpacity(0.02),
+            ],
+          ),
           border: Border.all(
-            color: theme.dividerColor,
+            color: const Color(0xFF6366F1).withOpacity(0.15),
             width: 1.5,
           ),
-          borderRadius: BorderRadius.circular(12),
-          color: theme.cardTheme.color,
+          borderRadius: BorderRadius.circular(14),
         ),
-        child: Icon(
-          icon,
-          size: 22,
-          color: theme.colorScheme.onSurface,
-        ),
+        child: Icon(icon, size: 24, color: const Color(0xFF6366F1)),
       ),
     );
   }

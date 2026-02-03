@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LimitSettingsScreen extends StatefulWidget {
   final String? appName;
-  
+
   const LimitSettingsScreen({super.key, this.appName});
 
   @override
@@ -25,39 +25,46 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    final keyPrefix = widget.appName != null ? 'app_${widget.appName}_' : 'global_';
-    
+    final keyPrefix = widget.appName != null
+        ? 'app_${widget.appName}_'
+        : 'global_';
+
     setState(() {
       _stepsToUnlock = prefs.getDouble('${keyPrefix}steps') ?? 1000;
       _unlockType = prefs.getString('${keyPrefix}type') ?? 'Time Limit';
       _unlockDuration = prefs.getDouble('${keyPrefix}duration') ?? 15;
-      _notificationsEnabled = prefs.getBool('${keyPrefix}notifications') ?? true;
+      _notificationsEnabled =
+          prefs.getBool('${keyPrefix}notifications') ?? true;
       _strictMode = prefs.getBool('${keyPrefix}strict') ?? false;
     });
   }
 
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    final keyPrefix = widget.appName != null ? 'app_${widget.appName}_' : 'global_';
-    
+    final keyPrefix = widget.appName != null
+        ? 'app_${widget.appName}_'
+        : 'global_';
+
     await prefs.setDouble('${keyPrefix}steps', _stepsToUnlock);
     await prefs.setString('${keyPrefix}type', _unlockType);
     await prefs.setDouble('${keyPrefix}duration', _unlockDuration);
     await prefs.setBool('${keyPrefix}notifications', _notificationsEnabled);
     await prefs.setBool('${keyPrefix}strict', _strictMode);
-    
+
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Settings saved')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Settings saved')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final title = widget.appName != null ? '${widget.appName} Settings' : 'Global Limits';
-    
+    final title = widget.appName != null
+        ? '${widget.appName} Settings'
+        : 'Global Limits';
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -70,19 +77,29 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
               titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
               title: Text(
                 title,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
                   color: theme.colorScheme.onBackground,
+                  fontSize: 16,
                 ),
               ),
             ),
             leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: theme.colorScheme.onBackground),
+              icon: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 20,
+                color: theme.colorScheme.onBackground,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             actions: [
               IconButton(
-                icon: Icon(Icons.save_rounded, color: theme.colorScheme.primary),
+                icon: Icon(
+                  Icons.save_rounded,
+                  color: theme.colorScheme.primary,
+                ),
                 onPressed: _saveSettings,
               ),
             ],
@@ -96,7 +113,7 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
                   _buildSectionHeader('App Configuration'),
                   _buildConfigCard(theme),
                   const SizedBox(height: 32),
-                  
+
                   _buildSectionHeader('Unlock Requirement'),
                   Container(
                     padding: const EdgeInsets.all(24),
@@ -124,9 +141,14 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withOpacity(0.1),
+                                color: theme.colorScheme.primary.withOpacity(
+                                  0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -143,11 +165,16 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
                         SliderTheme(
                           data: SliderTheme.of(context).copyWith(
                             activeTrackColor: theme.colorScheme.primary,
-                            inactiveTrackColor: theme.colorScheme.primary.withOpacity(0.2),
+                            inactiveTrackColor: theme.colorScheme.primary
+                                .withOpacity(0.2),
                             thumbColor: theme.colorScheme.primary,
-                            overlayColor: theme.colorScheme.primary.withOpacity(0.1),
+                            overlayColor: theme.colorScheme.primary.withOpacity(
+                              0.1,
+                            ),
                             trackHeight: 6,
-                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 12,
+                            ),
                           ),
                           child: Slider(
                             value: _stepsToUnlock,
@@ -191,17 +218,22 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
                               borderSide: BorderSide.none,
                             ),
                             filled: true,
-                            fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            fillColor: theme.colorScheme.surfaceContainerHighest
+                                .withOpacity(0.3),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
                           ),
                           dropdownColor: theme.cardTheme.color,
-                          items: ['Time Limit', 'App Opens', 'Daily Limit']
-                              .map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
+                          items: ['Time Limit', 'App Opens', 'Daily Limit'].map(
+                            (String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            },
+                          ).toList(),
                           onChanged: (newValue) {
                             setState(() {
                               _unlockType = newValue!;
@@ -220,9 +252,14 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary.withOpacity(0.1),
+                                  color: theme.colorScheme.primary.withOpacity(
+                                    0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -239,11 +276,15 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
                           SliderTheme(
                             data: SliderTheme.of(context).copyWith(
                               activeTrackColor: theme.colorScheme.primary,
-                              inactiveTrackColor: theme.colorScheme.primary.withOpacity(0.2),
+                              inactiveTrackColor: theme.colorScheme.primary
+                                  .withOpacity(0.2),
                               thumbColor: theme.colorScheme.primary,
-                              overlayColor: theme.colorScheme.primary.withOpacity(0.1),
+                              overlayColor: theme.colorScheme.primary
+                                  .withOpacity(0.1),
                               trackHeight: 6,
-                              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+                              thumbShape: const RoundSliderThumbShape(
+                                enabledThumbRadius: 12,
+                              ),
                             ),
                             child: Slider(
                               value: _unlockDuration,
@@ -279,7 +320,10 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 4,
-        extendedPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        extendedPadding: const EdgeInsets.symmetric(
+          horizontal: 32,
+          vertical: 16,
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
@@ -291,10 +335,10 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-              letterSpacing: 0.5,
-            ),
+          fontWeight: FontWeight.w700,
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }
@@ -316,7 +360,10 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
       child: Column(
         children: [
           SwitchListTile(
-            title: const Text('Notifications', style: TextStyle(fontWeight: FontWeight.w600)),
+            title: const Text(
+              'Notifications',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
             subtitle: const Text('Alert when limit reached'),
             value: _notificationsEnabled,
             onChanged: (bool value) {
@@ -326,11 +373,20 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
             },
             activeColor: theme.colorScheme.primary,
             contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
-          Divider(color: theme.dividerColor.withOpacity(0.5), indent: 16, endIndent: 16),
+          Divider(
+            color: theme.dividerColor.withOpacity(0.5),
+            indent: 16,
+            endIndent: 16,
+          ),
           SwitchListTile(
-            title: const Text('Strict Mode', style: TextStyle(fontWeight: FontWeight.w600)),
+            title: const Text(
+              'Strict Mode',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
             subtitle: const Text('Prevent unlocking until tomorrow'),
             value: _strictMode,
             onChanged: (bool value) {
@@ -340,7 +396,9 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
             },
             activeColor: theme.colorScheme.primary,
             contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
           ),
         ],
       ),

@@ -8,31 +8,36 @@ class PaywallScreen extends StatelessWidget {
 
   Future<void> _close(BuildContext context) async {
     final permissionService = PermissionService();
-    
+
     // Check if all permissions are granted
     bool usage = await permissionService.checkUsageStatsPermission();
-    bool activity = await permissionService.checkActivityRecognitionPermission();
+    bool activity = await permissionService
+        .checkActivityRecognitionPermission();
     bool overlay = await permissionService.checkOverlayPermission();
-    
+
     if (context.mounted) {
       if (usage && activity && overlay) {
         // All granted, go to dashboard
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const DashboardScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const DashboardScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
           ),
         );
       } else {
         // Not granted, go to permission screen
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const PermissionScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const PermissionScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
           ),
         );
       }
@@ -42,7 +47,7 @@ class PaywallScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: Stack(
         children: [
@@ -92,24 +97,36 @@ class PaywallScreen extends StatelessWidget {
                   Text(
                     'Unlock Premium',
                     style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.5,
-                          color: theme.colorScheme.onBackground,
-                        ),
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                      color: theme.colorScheme.onBackground,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Supercharge your productivity with unlimited access.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyLarge?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
-                          fontSize: 18,
-                        ),
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      fontSize: 18,
+                    ),
                   ),
                   const SizedBox(height: 48),
-                  _buildFeatureRow(context, 'Unlimited App Locks', Icons.lock_open_rounded),
-                  _buildFeatureRow(context, 'Custom Step Goals', Icons.directions_walk_rounded),
-                  _buildFeatureRow(context, 'Advanced Analytics', Icons.bar_chart_rounded),
+                  _buildFeatureRow(
+                    context,
+                    'Unlimited App Locks',
+                    Icons.lock_open_rounded,
+                  ),
+                  _buildFeatureRow(
+                    context,
+                    'Custom Step Goals',
+                    Icons.directions_walk_rounded,
+                  ),
+                  _buildFeatureRow(
+                    context,
+                    'Advanced Analytics',
+                    Icons.bar_chart_rounded,
+                  ),
                   const Spacer(),
                   SizedBox(
                     width: double.infinity,
@@ -123,7 +140,10 @@ class PaywallScreen extends StatelessWidget {
                       ),
                       child: const Text(
                         'Start 7-Day Free Trial',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -131,8 +151,8 @@ class PaywallScreen extends StatelessWidget {
                   Text(
                     'Then \$4.99/month. Cancel anytime.',
                     style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
-                        ),
+                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    ),
                   ),
                 ],
               ),
@@ -145,28 +165,39 @@ class PaywallScreen extends StatelessWidget {
 
   Widget _buildFeatureRow(BuildContext context, String text, IconData icon) {
     final theme = Theme.of(context);
-    
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.1),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  theme.colorScheme.primary,
+                  theme.colorScheme.primary.withOpacity(0.8),
+                ],
+              ),
               borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.colorScheme.primary.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            child: Icon(
-              icon,
-              size: 22,
-              color: theme.colorScheme.primary,
-            ),
+            child: Icon(icon, size: 24, color: Colors.white),
           ),
           const SizedBox(width: 16),
           Text(
             text,
             style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
+              fontSize: 15,
             ),
           ),
         ],

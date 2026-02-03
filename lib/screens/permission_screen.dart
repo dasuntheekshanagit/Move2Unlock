@@ -9,7 +9,8 @@ class PermissionScreen extends StatefulWidget {
   State<PermissionScreen> createState() => _PermissionScreenState();
 }
 
-class _PermissionScreenState extends State<PermissionScreen> with WidgetsBindingObserver {
+class _PermissionScreenState extends State<PermissionScreen>
+    with WidgetsBindingObserver {
   final PermissionService _permissionService = PermissionService();
   bool _activityPermission = false;
   bool _usageStatsPermission = false;
@@ -37,9 +38,10 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
 
   Future<void> _checkPermissions() async {
     bool usage = await _permissionService.checkUsageStatsPermission();
-    bool activity = await _permissionService.checkActivityRecognitionPermission();
+    bool activity = await _permissionService
+        .checkActivityRecognitionPermission();
     bool overlay = await _permissionService.checkOverlayPermission();
-    
+
     if (mounted) {
       setState(() {
         _usageStatsPermission = usage;
@@ -50,7 +52,8 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
   }
 
   Future<void> _requestActivity() async {
-    bool granted = await _permissionService.requestActivityRecognitionPermission();
+    bool granted = await _permissionService
+        .requestActivityRecognitionPermission();
     setState(() {
       _activityPermission = granted;
     });
@@ -60,12 +63,12 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
     await _permissionService.requestUsageStatsPermission();
     // Wait for user to return
   }
-  
+
   Future<void> _requestOverlay() async {
-      bool granted = await _permissionService.requestOverlayPermission();
-      setState(() {
-          _overlayPermission = granted;
-      });
+    bool granted = await _permissionService.requestOverlayPermission();
+    setState(() {
+      _overlayPermission = granted;
+    });
   }
 
   void _continue() {
@@ -76,20 +79,24 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
     } else {
       // Try to check again in case state is stale
       _checkPermissions().then((_) {
-          if (_usageStatsPermission && _activityPermission && _overlayPermission) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const DashboardScreen()),
-              );
-          } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Please grant all permissions to continue.'),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                ),
-              );
-          }
+        if (_usageStatsPermission &&
+            _activityPermission &&
+            _overlayPermission) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const DashboardScreen()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Please grant all permissions to continue.'),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
       });
     }
   }
@@ -97,134 +104,169 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+    const permissionColor = Color(0xFF6366F1); // Indigo color
+
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 40),
-              // Header
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.1),
-                  shape: BoxShape.circle,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 130,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [permissionColor, Color(0xFF4F46E5)],
+                  ),
                 ),
-                child: Icon(
-                  Icons.shield_outlined,
-                  size: 28,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Setup Permissions',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: theme.colorScheme.onBackground,
-                  fontSize: 22,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'To help you stay focused and track your progress, Motivation Lock needs access to a few things.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
-                  height: 1.5,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-              // Permission Tiles
-              Expanded(
-                child: ListView(
+                child: Stack(
                   children: [
-                    _buildPermissionTile(
-                      context,
-                      'Activity Recognition',
-                      'Required to count your steps accurately.',
-                      Icons.directions_walk_rounded,
-                      _activityPermission,
-                      _requestActivity,
+                    Positioned(
+                      top: 40,
+                      right: -30,
+                      child: Container(
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    _buildPermissionTile(
-                      context,
-                      'Usage Access',
-                      'Required to detect when you open locked apps.',
-                      Icons.data_usage_rounded,
-                      _usageStatsPermission,
-                      _requestUsage,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildPermissionTile(
-                      context,
-                      'Display Over Apps',
-                      'Required to show the lock screen overlay.',
-                      Icons.layers_rounded,
-                      _overlayPermission,
-                      _requestOverlay,
+                    Positioned(
+                      bottom: -20,
+                      left: -20,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-              
-              // Bottom Action
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _continue,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shadowColor: theme.colorScheme.primary.withOpacity(0.4),
-                    elevation: 4,
-                  ),
-                  child: const Text(
-                    'Continue to Dashboard',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
+              title: Text(
+                'Setup Permissions',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 16),
-            ],
+              centerTitle: false,
+            ),
           ),
-        ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 24),
+                  Text(
+                    'To help you stay focused and track your progress, Motivation Lock needs access to a few things.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      height: 1.5,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildPermissionTile(
+                    context,
+                    'Activity Recognition',
+                    'Required to count your steps accurately.',
+                    Icons.directions_walk_rounded,
+                    _activityPermission,
+                    _requestActivity,
+                    const Color(0xFF06B6D4),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildPermissionTile(
+                    context,
+                    'Usage Access',
+                    'Required to detect when you open locked apps.',
+                    Icons.data_usage_rounded,
+                    _usageStatsPermission,
+                    _requestUsage,
+                    const Color(0xFFF59E0B),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildPermissionTile(
+                    context,
+                    'Display Over Apps',
+                    'Required to show the lock screen overlay.',
+                    Icons.layers_rounded,
+                    _overlayPermission,
+                    _requestOverlay,
+                    const Color(0xFF10B981),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: _continue,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shadowColor: permissionColor.withOpacity(0.4),
+                        elevation: 4,
+                      ),
+                      child: const Text(
+                        'Continue to Dashboard',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildPermissionTile(
-      BuildContext context,
-      String title, 
-      String subtitle, 
-      IconData icon,
-      bool isGranted, 
-      VoidCallback onTap) {
+    BuildContext context,
+    String title,
+    String subtitle,
+    IconData icon,
+    bool isGranted,
+    VoidCallback onTap,
+    Color color,
+  ) {
     final theme = Theme.of(context);
-    
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       decoration: BoxDecoration(
-        color: isGranted 
-            ? theme.colorScheme.primary.withOpacity(0.05) 
-            : theme.cardTheme.color,
+        gradient: isGranted
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [color.withOpacity(0.12), color.withOpacity(0.03)],
+              )
+            : null,
+        color: isGranted ? null : theme.cardTheme.color,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isGranted 
-              ? theme.colorScheme.primary.withOpacity(0.5) 
-              : Colors.transparent,
+          color: isGranted ? color.withOpacity(0.3) : Colors.transparent,
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: isGranted
+                ? color.withOpacity(0.1)
+                : Colors.black.withOpacity(0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -242,16 +284,28 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: isGranted 
-                        ? theme.colorScheme.primary 
-                        : theme.colorScheme.surfaceContainerHighest,
+                    gradient: isGranted
+                        ? LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [color, color.withOpacity(0.8)],
+                          )
+                        : null,
+                    color: isGranted ? null : color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
+                    boxShadow: isGranted
+                        ? [
+                            BoxShadow(
+                              color: color.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : [],
                   ),
                   child: Icon(
-                    isGranted ? Icons.check_rounded : icon, 
-                    color: isGranted 
-                        ? Colors.white 
-                        : theme.colorScheme.onSurfaceVariant,
+                    isGranted ? Icons.check_rounded : icon,
+                    color: isGranted ? Colors.white : color,
                     size: 20,
                   ),
                 ),
@@ -261,10 +315,12 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title, 
+                        title,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: isGranted ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                          color: isGranted
+                              ? color
+                              : theme.colorScheme.onSurface,
                           fontSize: 15,
                         ),
                       ),
@@ -281,11 +337,7 @@ class _PermissionScreenState extends State<PermissionScreen> with WidgetsBinding
                   ),
                 ),
                 if (!isGranted)
-                  Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 14,
-                    color: theme.colorScheme.onSurface.withOpacity(0.3),
-                  ),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: color),
               ],
             ),
           ),

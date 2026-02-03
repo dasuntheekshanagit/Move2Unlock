@@ -27,7 +27,7 @@ class _AppsScreenState extends State<AppsScreen> {
   Future<void> _loadData() async {
     await _appLockService.init();
     final lockedPackageNames = _appLockService.lockedPackages;
-    
+
     if (lockedPackageNames.isEmpty) {
       if (mounted) {
         setState(() {
@@ -39,9 +39,14 @@ class _AppsScreenState extends State<AppsScreen> {
     }
 
     final allApps = await InstalledApps.getInstalledApps(true, true);
-    final locked = allApps.where((app) => lockedPackageNames.contains(app.packageName)).toList();
-    
-    locked.sort((a, b) => (a.name ?? '').toLowerCase().compareTo((b.name ?? '').toLowerCase()));
+    final locked = allApps
+        .where((app) => lockedPackageNames.contains(app.packageName))
+        .toList();
+
+    locked.sort(
+      (a, b) =>
+          (a.name ?? '').toLowerCase().compareTo((b.name ?? '').toLowerCase()),
+    );
 
     if (mounted) {
       setState(() {
@@ -50,7 +55,7 @@ class _AppsScreenState extends State<AppsScreen> {
       });
     }
   }
-  
+
   void _refresh() {
     setState(() {
       _isLoading = true;
@@ -61,24 +66,96 @@ class _AppsScreenState extends State<AppsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'App Controls',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: theme.colorScheme.onBackground,
-          ),
-        ),
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        actions: [
-          _buildPopupMenu(context),
-        ],
-      ),
       body: CustomScrollView(
         slivers: [
+          // Custom Modern Header - Unified App Branding
+          SliverAppBar(
+            expandedHeight: 100,
+            floating: false,
+            pinned: true,
+            backgroundColor: theme.scaffoldBackgroundColor,
+            elevation: 0,
+            flexibleSpace: FlexibleSpaceBar(
+              collapseMode: CollapseMode.parallax,
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      theme.colorScheme.primary.withOpacity(0.08),
+                      theme.colorScheme.secondary.withOpacity(0.03),
+                    ],
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 24,
+                    right: 24,
+                    top: 16,
+                    bottom: 12,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      theme.colorScheme.primary,
+                                      theme.colorScheme.primary.withOpacity(
+                                        0.8,
+                                      ),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: theme.colorScheme.primary
+                                          .withOpacity(0.2),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.lock_clock_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Motivation Lock',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 18,
+                                  color: theme.colorScheme.onBackground,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      _buildPopupMenu(context),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -97,7 +174,9 @@ class _AppsScreenState extends State<AppsScreen> {
                         onPressed: () async {
                           await Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const AppSelectionScreen()),
+                            MaterialPageRoute(
+                              builder: (context) => const AppSelectionScreen(),
+                            ),
                           );
                           _refresh();
                         },
@@ -115,7 +194,7 @@ class _AppsScreenState extends State<AppsScreen> {
               ),
             ),
           ),
-          
+
           if (_isLoading)
             const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
@@ -127,7 +206,11 @@ class _AppsScreenState extends State<AppsScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.apps_outlined, size: 48, color: theme.colorScheme.onSurface.withOpacity(0.2)),
+                    Icon(
+                      Icons.apps_outlined,
+                      size: 48,
+                      color: theme.colorScheme.onSurface.withOpacity(0.2),
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'No apps locked yet',
@@ -140,7 +223,9 @@ class _AppsScreenState extends State<AppsScreen> {
                       onPressed: () async {
                         await Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const AppSelectionScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const AppSelectionScreen(),
+                          ),
                         );
                         _refresh();
                       },
@@ -154,16 +239,13 @@ class _AppsScreenState extends State<AppsScreen> {
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final app = _lockedApps[index];
-                    return _buildAppItem(theme, app);
-                  },
-                  childCount: _lockedApps.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final app = _lockedApps[index];
+                  return _buildAppItem(theme, app, index);
+                }, childCount: _lockedApps.length),
               ),
             ),
-            
+
           const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
         ],
       ),
@@ -172,7 +254,10 @@ class _AppsScreenState extends State<AppsScreen> {
 
   Widget _buildPopupMenu(BuildContext context) {
     return PopupMenuButton<String>(
-      icon: Icon(Icons.more_vert_rounded, color: Theme.of(context).colorScheme.onBackground),
+      icon: Icon(
+        Icons.more_vert_rounded,
+        color: Theme.of(context).colorScheme.onBackground,
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       onSelected: (value) {
         if (value == 'profile') {
@@ -234,9 +319,19 @@ class _AppsScreenState extends State<AppsScreen> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: theme.cardTheme.color,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              theme.colorScheme.primary.withOpacity(0.08),
+              theme.colorScheme.primary.withOpacity(0.02),
+            ],
+          ),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: theme.colorScheme.primary.withOpacity(0.1)),
+          border: Border.all(
+            color: theme.colorScheme.primary.withOpacity(0.15),
+            width: 1,
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.02),
@@ -250,10 +345,24 @@ class _AppsScreenState extends State<AppsScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.1),
-                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primary,
+                    theme.colorScheme.primary.withOpacity(0.8),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: Icon(Icons.tune_rounded, color: theme.colorScheme.primary),
+              child: Icon(Icons.tune_rounded, color: Colors.white, size: 22),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -276,61 +385,136 @@ class _AppsScreenState extends State<AppsScreen> {
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.3)),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: theme.colorScheme.onSurface.withOpacity(0.3),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAppItem(ThemeData theme, AppInfo app) {
+  Widget _buildAppItem(ThemeData theme, AppInfo app, int index) {
+    // Color rotation across 4 vibrant colors
+    const colors = [
+      Color(0xFF06B6D4), // Cyan
+      Color(0xFFF59E0B), // Amber
+      Color(0xFF10B981), // Emerald
+      Color(0xFFEC4899), // Pink
+    ];
+    final color = colors[index % colors.length];
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: theme.cardTheme.color,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color.withOpacity(0.08), color.withOpacity(0.02)],
+        ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.01),
-            blurRadius: 4,
+            color: color.withOpacity(0.08),
+            blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
+        border: Border.all(color: color.withOpacity(0.2), width: 1),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [color, color.withOpacity(0.8)],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: app.icon != null
+                      ? Image.memory(app.icon!, width: 24, height: 24)
+                      : Icon(Icons.android, size: 24, color: Colors.white),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        app.name ?? 'Unknown',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Using Global Limits',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [color, color.withOpacity(0.8)],
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.settings_outlined,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              LimitSettingsScreen(appName: app.name),
+                        ),
+                      );
+                    },
+                    padding: const EdgeInsets.all(8),
+                    constraints: const BoxConstraints(),
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: app.icon != null
-              ? Image.memory(app.icon!, width: 24, height: 24)
-              : Icon(Icons.android, size: 24, color: theme.colorScheme.onSurfaceVariant),
-        ),
-        title: Text(
-          app.name ?? 'Unknown',
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        subtitle: Text(
-          'Using Global Limits', 
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.5),
-          ),
-        ),
-        trailing: IconButton(
-          icon: Icon(Icons.settings_outlined, color: theme.colorScheme.primary),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => LimitSettingsScreen(appName: app.name),
-              ),
-            );
-          },
         ),
       ),
     );
