@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/auth_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -10,8 +12,44 @@ void main() {
   runApp(const MotivationLockApp());
 }
 
-class MotivationLockApp extends StatelessWidget {
+class MotivationLockApp extends StatefulWidget {
   const MotivationLockApp({super.key});
+
+  @override
+  State<MotivationLockApp> createState() => _MotivationLockAppState();
+  
+  static _MotivationLockAppState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_MotivationLockAppState>();
+}
+
+class _MotivationLockAppState extends State<MotivationLockApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTheme();
+  }
+
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isDark = prefs.getBool('setting_dark_mode');
+    setState(() {
+      if (isDark == true) {
+        _themeMode = ThemeMode.dark;
+      } else if (isDark == false) {
+        _themeMode = ThemeMode.light;
+      } else {
+        _themeMode = ThemeMode.system;
+      }
+    });
+  }
+
+  void changeTheme(ThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +58,8 @@ class MotivationLockApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _buildLightTheme(),
       darkTheme: _buildDarkTheme(),
-      themeMode: ThemeMode.system,
-      home: const AuthScreen(),
+      themeMode: _themeMode,
+      home: const SplashScreen(),
     );
   }
 

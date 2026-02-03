@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../main.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -32,7 +33,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
     setState(() {
-      if (key == 'setting_dark_mode') _darkMode = value;
+      if (key == 'setting_dark_mode') {
+        _darkMode = value;
+        // Update app theme
+        MotivationLockApp.of(context)?.changeTheme(value ? ThemeMode.dark : ThemeMode.light);
+      }
       if (key == 'setting_notifications') _notifications = value;
       if (key == 'setting_sound') _soundEffects = value;
     });
