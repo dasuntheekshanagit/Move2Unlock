@@ -66,192 +66,182 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 110,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      theme.colorScheme.primary.withOpacity(0.1),
-                      theme.colorScheme.primary.withOpacity(0.05),
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 40,
-                      right: -30,
-                      child: Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: -20,
-                      left: -20,
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.03),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
+      body: Column(
+        children: [
+          // Fixed Header with Back Button
+          SafeArea(
+            bottom: false,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primary.withOpacity(0.08),
+                    theme.colorScheme.secondary.withOpacity(0.03),
                   ],
                 ),
               ),
-              title: Text(
-                'My Profile',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                  color: theme.colorScheme.onBackground,
-                ),
+              padding: const EdgeInsets.only(
+                left: 16,
+                right: 24,
+                top: 12,
+                bottom: 12,
               ),
-              centerTitle: false,
-            ),
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 20,
-                color: theme.colorScheme.onBackground,
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-            actions: [
-              if (_isEditing)
-                IconButton(
-                  icon: Icon(
-                    Icons.check_rounded,
-                    color: theme.colorScheme.primary,
-                  ),
-                  onPressed: _saveProfile,
-                )
-              else
-                IconButton(
-                  icon: Icon(
-                    Icons.edit_rounded,
-                    color: theme.colorScheme.primary,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isEditing = true;
-                    });
-                  },
-                ),
-            ],
-          ),
-          SliverToBoxAdapter(
-            child: SingleChildScrollView(
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
+              child: Row(
                 children: [
-                  const SizedBox(height: 20),
-                  Center(
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                theme.colorScheme.primary,
-                                theme.colorScheme.primary.withOpacity(0.8),
-                              ],
-                            ),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: theme.colorScheme.primary.withOpacity(
-                                  0.3,
-                                ),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.person_rounded,
-                            size: 60,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        _buildEditableField(
-                          theme,
-                          'Name',
-                          _nameController,
-                          Icons.person_outline,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildEditableField(
-                          theme,
-                          'Email',
-                          _emailController,
-                          Icons.email_outlined,
-                        ),
-                      ],
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 20,
+                      color: theme.colorScheme.onBackground,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
                     ),
                   ),
-                  const SizedBox(height: 40),
-                  _buildProfileOption(
-                    theme,
-                    'Change Password',
-                    Icons.lock_outline,
-                    theme.colorScheme.primary,
-                  ),
-                  _buildProfileOption(
-                    theme,
-                    'Notifications',
-                    Icons.notifications_outlined,
-                    theme.colorScheme.primary,
-                  ),
-                  _buildProfileOption(
-                    theme,
-                    'Privacy Policy',
-                    Icons.privacy_tip_outlined,
-                    theme.colorScheme.primary,
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: _logout,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: theme.colorScheme.error.withOpacity(
-                          0.12,
-                        ),
-                        foregroundColor: theme.colorScheme.error,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Log Out',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                        ),
+                  Expanded(
+                    child: Text(
+                      'My Profile',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                        color: theme.colorScheme.onBackground,
                       ),
                     ),
                   ),
+                  if (_isEditing)
+                    IconButton(
+                      icon: Icon(
+                        Icons.check_rounded,
+                        color: theme.colorScheme.primary,
+                      ),
+                      onPressed: _saveProfile,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                    )
+                  else
+                    IconButton(
+                      icon: Icon(
+                        Icons.edit_rounded,
+                        color: theme.colorScheme.primary,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isEditing = true;
+                        });
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                    ),
                 ],
               ),
+            ),
+          ),
+          // Content Area
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(24.0),
+              children: [
+                const SizedBox(height: 20),
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              theme.colorScheme.primary,
+                              theme.colorScheme.primary.withOpacity(0.8),
+                            ],
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.colorScheme.primary.withOpacity(0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.person_rounded,
+                          size: 60,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildEditableField(
+                        theme,
+                        'Name',
+                        _nameController,
+                        Icons.person_outline,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildEditableField(
+                        theme,
+                        'Email',
+                        _emailController,
+                        Icons.email_outlined,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40),
+                _buildProfileOption(
+                  theme,
+                  'Change Password',
+                  Icons.lock_outline,
+                  theme.colorScheme.primary,
+                ),
+                _buildProfileOption(
+                  theme,
+                  'Notifications',
+                  Icons.notifications_outlined,
+                  theme.colorScheme.primary,
+                ),
+                _buildProfileOption(
+                  theme,
+                  'Privacy Policy',
+                  Icons.privacy_tip_outlined,
+                  theme.colorScheme.primary,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _logout,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: theme.colorScheme.error.withOpacity(
+                        0.12,
+                      ),
+                      foregroundColor: theme.colorScheme.error,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Log Out',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

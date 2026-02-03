@@ -44,17 +44,148 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  void _navigateToProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+    );
+  }
+
+  void _navigateToSettings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
+      body: Column(
         children: [
-          _buildHomeTab(theme),
-          const AppsScreen(),
-          const StatsScreen(),
+          // Fixed Header with SafeArea
+          SafeArea(
+            bottom: false,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.primary.withOpacity(0.08),
+                    theme.colorScheme.secondary.withOpacity(0.03),
+                  ],
+                ),
+              ),
+              padding: const EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 16,
+                bottom: 16,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              theme.colorScheme.primary,
+                              theme.colorScheme.primary.withOpacity(0.8),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.colorScheme.primary.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.lock_clock_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Motivation Lock',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                          color: theme.colorScheme.onBackground,
+                        ),
+                      ),
+                    ],
+                  ),
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_vert_rounded,
+                      color: theme.colorScheme.onBackground,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    onSelected: (value) {
+                      if (value == 'profile') {
+                        _navigateToProfile();
+                      } else if (value == 'settings') {
+                        _navigateToSettings();
+                      }
+                    },
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<String>>[
+                          const PopupMenuItem<String>(
+                            value: 'profile',
+                            child: ListTile(
+                              leading: Icon(Icons.person_outline, size: 20),
+                              title: Text(
+                                'Profile',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              contentPadding: EdgeInsets.zero,
+                              dense: true,
+                            ),
+                          ),
+                          const PopupMenuItem<String>(
+                            value: 'settings',
+                            child: ListTile(
+                              leading: Icon(Icons.settings_outlined, size: 20),
+                              title: Text(
+                                'Settings',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              contentPadding: EdgeInsets.zero,
+                              dense: true,
+                            ),
+                          ),
+                        ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Content Area - Switches based on selected tab
+          Expanded(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: [
+                HomeContent(steps: _steps),
+                const AppsContent(),
+                const StatsContent(),
+              ],
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -89,174 +220,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+}
 
-  Widget _buildHomeTab(ThemeData theme) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Custom Modern Header - Unified App Branding
-          SliverAppBar(
-            expandedHeight: 100,
-            floating: false,
-            pinned: true,
-            backgroundColor: theme.scaffoldBackgroundColor,
-            elevation: 0,
-            flexibleSpace: FlexibleSpaceBar(
-              collapseMode: CollapseMode.parallax,
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      theme.colorScheme.primary.withOpacity(0.08),
-                      theme.colorScheme.secondary.withOpacity(0.03),
-                    ],
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 24,
-                    right: 24,
-                    top: 16,
-                    bottom: 12,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      theme.colorScheme.primary,
-                                      theme.colorScheme.primary.withOpacity(
-                                        0.8,
-                                      ),
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: theme.colorScheme.primary
-                                          .withOpacity(0.2),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.lock_clock_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Motivation Lock',
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 18,
-                                  color: theme.colorScheme.onBackground,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      _buildPopupMenu(context),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildGreetingCard(theme),
-                  const SizedBox(height: 20),
-                  _buildStepsCard(theme),
-                  const SizedBox(height: 20),
-                  _buildSmallStatGraph(theme),
-                  const SizedBox(height: 20),
-                  _buildMotivationCard(theme),
-                  const SizedBox(height: 80),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+// Home Tab Content
+class HomeContent extends StatelessWidget {
+  final int steps;
 
-  Widget _buildPopupMenu(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: Icon(
-        Icons.more_vert_rounded,
-        color: Theme.of(context).colorScheme.onBackground,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      onSelected: (value) {
-        if (value == 'profile') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ProfileScreen()),
-          );
-        } else if (value == 'settings') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const SettingsScreen()),
-          );
-        }
-      },
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        const PopupMenuItem<String>(
-          value: 'profile',
-          child: ListTile(
-            leading: Icon(Icons.person_outline, size: 20),
-            title: Text('Profile', style: TextStyle(fontSize: 14)),
-            contentPadding: EdgeInsets.zero,
-            dense: true,
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'settings',
-          child: ListTile(
-            leading: Icon(Icons.settings_outlined, size: 20),
-            title: Text('Settings', style: TextStyle(fontSize: 14)),
-            contentPadding: EdgeInsets.zero,
-            dense: true,
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'help',
-          child: ListTile(
-            leading: Icon(Icons.help_outline, size: 20),
-            title: Text('Help & Support', style: TextStyle(fontSize: 14)),
-            contentPadding: EdgeInsets.zero,
-            dense: true,
-          ),
-        ),
+  const HomeContent({super.key, required this.steps});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      children: [
+        const SizedBox(height: 12),
+        _buildGreetingCard(theme),
+        const SizedBox(height: 20),
+        _buildStepsCard(theme, steps),
+        const SizedBox(height: 20),
+        _buildSmallStatGraph(theme),
+        const SizedBox(height: 20),
+        _buildMotivationCard(theme),
+        const SizedBox(height: 80),
       ],
     );
   }
 
   Widget _buildGreetingCard(ThemeData theme) {
-    // Mock date
     final now = DateTime.now();
     final months = [
       'Jan',
@@ -319,19 +311,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Welcome back, ',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 20,
-                    color: theme.colorScheme.onSurface,
+                  text: "Let's stay ",
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontSize: 16,
+                    height: 1.4,
                   ),
                 ),
                 TextSpan(
-                  text: 'Dasun',
-                  style: theme.textTheme.headlineSmall?.copyWith(
+                  text: 'focused',
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w800,
-                    fontSize: 20,
                     color: theme.colorScheme.primary,
+                    fontSize: 16,
+                    height: 1.4,
+                  ),
+                ),
+                TextSpan(
+                  text: ' today! 🎯',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontSize: 16,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -342,137 +341,73 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStepsCard(ThemeData theme) {
-    const int stepGoal = 5000;
-    double progress = _steps / stepGoal;
-    if (progress > 1.0) progress = 1.0;
-
+  Widget _buildStepsCard(ThemeData theme, int steps) {
     return Container(
-      height: 200,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.primary,
-            theme.colorScheme.primary.withOpacity(0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(28),
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withOpacity(0.25),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(
+          color: theme.colorScheme.primary.withOpacity(0.05),
+          width: 1,
+        ),
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned(
-            right: -20,
-            top: -20,
-            child: Icon(
-              Icons.directions_walk,
-              size: 140,
-              color: Colors.white.withOpacity(0.08),
+          Text(
+            'Today\'s Steps',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 8),
+          Text(
+            'Walk more to unlock apps',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.bolt_rounded, color: Colors.white, size: 14),
-                        const SizedBox(width: 4),
-                        const Text(
-                          'Daily Goal',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.more_horiz,
-                    color: Colors.white.withOpacity(0.6),
-                    size: 22,
-                  ),
-                ],
+              Text(
+                steps.toString(),
+                style: theme.textTheme.displayMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 36,
+                  color: theme.colorScheme.primary,
+                ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        '$_steps',
-                        style: const TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          height: 1,
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(left: 8, bottom: 8),
-                        child: Text(
-                          '/ 5K',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      theme.colorScheme.primary.withOpacity(0.15),
+                      theme.colorScheme.primary.withOpacity(0.05),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: SizedBox(
-                      height: 8,
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: Colors.black.withOpacity(0.15),
-                        valueColor: const AlwaysStoppedAnimation(Colors.white),
-                        minHeight: 8,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${(progress * 100).toInt()}% of daily goal',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.75),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.directions_walk_rounded,
+                  size: 32,
+                  color: theme.colorScheme.primary,
+                ),
               ),
             ],
           ),
@@ -482,8 +417,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildSmallStatGraph(ThemeData theme) {
-    final data = [0.3, 0.5, 0.4, 0.7, 0.6, 0.8, 0.5];
-
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -535,15 +468,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(data.length, (index) {
-                final isToday = index == data.length - 1;
+              children: List.generate(7, (index) {
+                final data = [0.4, 0.6, 0.3, 0.8, 0.5, 0.9, 0.7];
+                final value = data[index];
+                final isToday = index == 6;
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
                       width: 14,
-                      height: 80 * data[index],
+                      height: 80 * value,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
@@ -580,7 +515,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildMotivationCard(ThemeData theme) {
-    // Use different color - emerald/green theme
     const Color accentColor = Color(0xFF10B981);
 
     return Container(
@@ -595,71 +529,73 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: accentColor.withOpacity(0.3), width: 1),
+        border: Border.all(color: accentColor.withOpacity(0.2), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [accentColor, accentColor.withOpacity(0.8)],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: accentColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.lightbulb_rounded,
-                  size: 18,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 10),
               Text(
-                'Daily Inspiration',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontSize: 12,
+                'Daily Motivation',
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: accentColor,
-                  letterSpacing: 0.5,
+                  fontSize: 16,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: accentColor.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.favorite_rounded,
+                  size: 16,
+                  color: accentColor,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Text(
-            '"The only way to do great work is to love what you do."',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontSize: 16,
+            '"The secret of getting ahead is getting started." - Mark Twain',
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontStyle: FontStyle.italic,
               height: 1.5,
-              color: theme.colorScheme.onSurface,
-              fontWeight: FontWeight.w500,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '— Steve Jobs',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.5),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
+  }
+}
+
+// Apps Tab Content - Simple wrapper
+class AppsContent extends StatelessWidget {
+  const AppsContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const AppsScreen();
+  }
+}
+
+// Stats Tab Content - Simple wrapper
+class StatsContent extends StatelessWidget {
+  const StatsContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const StatsScreen();
   }
 }
