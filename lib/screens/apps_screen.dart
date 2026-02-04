@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';
 import '../services/app_lock_service.dart';
+import '../services/step_service.dart';
 import 'limit_settings_screen.dart';
 import 'app_selection_screen.dart';
 
@@ -14,8 +15,10 @@ class AppsScreen extends StatefulWidget {
 
 class _AppsScreenState extends State<AppsScreen> {
   final AppLockService _appLockService = AppLockService();
+  final StepService _stepService = StepService();
   List<AppInfo> _lockedApps = [];
   bool _isLoading = true;
+  int _currentSteps = 0;
 
   @override
   void initState() {
@@ -25,6 +28,8 @@ class _AppsScreenState extends State<AppsScreen> {
 
   Future<void> _loadData() async {
     await _appLockService.init();
+    await _stepService.init();
+
     final lockedPackageNames = _appLockService.lockedPackages;
 
     if (lockedPackageNames.isEmpty) {
@@ -53,6 +58,15 @@ class _AppsScreenState extends State<AppsScreen> {
         _isLoading = false;
       });
     }
+
+    // Listen to step changes
+    _stepService.stepStream.listen((steps) {
+      if (mounted) {
+        setState(() {
+          _currentSteps = steps;
+        });
+      }
+    });
   }
 
   void _refresh() {
@@ -254,6 +268,18 @@ class _AppsScreenState extends State<AppsScreen> {
     ];
     final color = colors[index % colors.length];
 
+    final stepRequirement = _appLockService.getStepRequirement(
+      app.packageName ?? '',
+    );
+    final canUnlock = _appLockService.canUnlockApp(
+      app.packageName ?? '',
+      _currentSteps,
+    );
+    final stepsRemaining = (stepRequirement - _currentSteps).clamp(
+      0,
+      stepRequirement,
+    );
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -276,7 +302,16 @@ class _AppsScreenState extends State<AppsScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {},
+          onTap: () {
+            _showAppUnlockDialog(
+              theme,
+              app,
+              canUnlock,
+              stepsRemaining,
+              stepRequirement,
+              color,
+            );
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -315,13 +350,33 @@ class _AppsScreenState extends State<AppsScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        'Using Global Limits',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
-                          fontSize: 12,
+                      if (canUnlock)
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              size: 14,
+                              color: Colors.green,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Ready to unlock',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.green,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Text(
+                          'Need $stepsRemaining more steps',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -348,13 +403,7 @@ class _AppsScreenState extends State<AppsScreen> {
                       size: 20,
                     ),
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              LimitSettingsScreen(appName: app.name),
-                        ),
-                      );
+                      _showStepSettingsDialog(theme, app, color);
                     },
                     padding: const EdgeInsets.all(8),
                     constraints: const BoxConstraints(),
@@ -363,6 +412,218 @@ class _AppsScreenState extends State<AppsScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showAppUnlockDialog(
+    ThemeData theme,
+    AppInfo app,
+    bool canUnlock,
+    int stepsRemaining,
+    int stepRequirement,
+    Color color,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(app.name ?? 'App'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: color.withOpacity(0.2)),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    '$_currentSteps',
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Steps Taken',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: (_currentSteps / stepRequirement).clamp(0.0, 1.0),
+                      minHeight: 8,
+                      backgroundColor: color.withOpacity(0.2),
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Required: $stepRequirement',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                      if (!canUnlock)
+                        Text(
+                          'Need: $stepsRemaining',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
+                      else
+                        Text(
+                          'Complete!',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.green,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            if (canUnlock)
+              Text(
+                'You can now unlock this app!',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.green,
+                  fontWeight: FontWeight.w600,
+                ),
+              )
+            else
+              Text(
+                'Keep walking to unlock this app',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showStepSettingsDialog(ThemeData theme, AppInfo app, Color color) {
+    final packageName = app.packageName ?? '';
+    int currentRequirement = _appLockService.getStepRequirement(packageName);
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text('Set Step Requirement'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'App: ${app.name}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Steps Required: $currentRequirement',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Slider(
+                value: currentRequirement.toDouble(),
+                min: 10,
+                max: 500,
+                divisions: 49,
+                label: currentRequirement.toString(),
+                onChanged: (value) {
+                  setState(() {
+                    currentRequirement = value.toInt();
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: color.withOpacity(0.2)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Current Steps:', style: theme.textTheme.bodySmall),
+                    Text(
+                      '$_currentSteps',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: color,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                await _appLockService.setStepRequirement(
+                  packageName,
+                  currentRequirement,
+                );
+                if (mounted) {
+                  Navigator.pop(context);
+                  setState(() {});
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Step requirement updated to $currentRequirement',
+                      ),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
         ),
       ),
     );
