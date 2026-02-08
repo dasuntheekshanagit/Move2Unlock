@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'apps_screen.dart';
-import 'stats_screen.dart';
-import 'profile_screen.dart';
-import 'settings_screen.dart';
-import '../services/step_service.dart';
-import '../services/app_lock_service.dart';
+import '../../app_lock/screens/apps_screen.dart';
+import '../../stats/screens/stats_screen.dart';
+import '../../profile/screens/profile_screen.dart';
+import '../../settings/screens/settings_screen.dart';
+import '../../../core/services/step_service.dart';
+import '../../app_lock/services/app_lock_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -119,7 +119,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        'Motivation Lock',
+                        'Move2Unlock',
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 18,
@@ -222,6 +222,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
+// TODO: above is the template. below from hee is home scree. so lets move it to separate file for clearner.
 // Home Tab Content
 class HomeContent extends StatelessWidget {
   final int steps;
@@ -236,13 +237,13 @@ class HomeContent extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       children: [
         const SizedBox(height: 12),
+        _buildMotivationCard(theme),
+        const SizedBox(height: 20),
         _buildGreetingCard(theme),
         const SizedBox(height: 20),
         _buildStepsCard(theme, steps),
         const SizedBox(height: 20),
         _buildSmallStatGraph(theme),
-        const SizedBox(height: 20),
-        _buildMotivationCard(theme),
         const SizedBox(height: 80),
       ],
     );
@@ -416,6 +417,7 @@ class HomeContent extends StatelessWidget {
     );
   }
 
+  // TODO: whe click on here direct to stat page.
   Widget _buildSmallStatGraph(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -514,6 +516,7 @@ class HomeContent extends StatelessWidget {
     );
   }
 
+  // TODO:
   Widget _buildMotivationCard(ThemeData theme) {
     const Color accentColor = Color(0xFF10B981);
 

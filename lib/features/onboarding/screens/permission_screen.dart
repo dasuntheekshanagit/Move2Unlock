@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/permission_service.dart';
-import 'dashboard_screen.dart';
+import '../../../core/services/permission_service.dart';
+import '../../dashboard/screens/dashboard_screen.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});
@@ -60,6 +60,7 @@ class _PermissionScreenState extends State<PermissionScreen>
   }
 
   Future<void> _requestUsage() async {
+    // TODO: Check?
     await _permissionService.requestUsageStatsPermission();
     // Wait for user to return
   }

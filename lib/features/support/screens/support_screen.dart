@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// TODO: use the template and theme as other screens do
 class SupportScreen extends StatelessWidget {
   const SupportScreen({super.key});
 

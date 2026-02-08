@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../core/services/permission_service.dart';
 import 'permission_screen.dart';
-import 'dashboard_screen.dart';
-import '../services/permission_service.dart';
+import '../../dashboard/screens/dashboard_screen.dart';
 
 class PaywallScreen extends StatelessWidget {
   const PaywallScreen({super.key});

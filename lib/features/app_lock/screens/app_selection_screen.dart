@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';
-import '../services/app_lock_service.dart';
+import '../../app_lock/services/app_lock_service.dart';
 import 'limit_settings_screen.dart';
 
 class AppSelectionScreen extends StatefulWidget {
@@ -71,6 +71,7 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                   backgroundColor: theme.scaffoldBackgroundColor,
                   flexibleSpace: FlexibleSpaceBar(
                     titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
+                    // TODO: text is too large. use a template as others screen do.
                     title: Text(
                       'Select Apps',
                       style: theme.textTheme.headlineSmall?.copyWith(

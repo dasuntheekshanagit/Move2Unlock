@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'paywall_screen.dart';
+import '../../paywall/screens/paywall_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -80,7 +80,7 @@ class _AuthScreenState extends State<AuthScreen>
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Motivation Lock',
+                      'Move2Unlock',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.displayLarge?.copyWith(
                         fontSize: 28,
@@ -431,6 +431,7 @@ class _AuthScreenState extends State<AuthScreen>
         const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          // TODO: use colored icons
           children: [
             _buildSocialButton(Icons.apple, theme, isDark),
             const SizedBox(width: 16),

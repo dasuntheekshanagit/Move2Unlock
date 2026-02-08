@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';
 import '../services/app_lock_service.dart';
-import '../services/step_service.dart';
+import '../../../core/services/step_service.dart';
 import 'limit_settings_screen.dart';
 import 'app_selection_screen.dart';
 

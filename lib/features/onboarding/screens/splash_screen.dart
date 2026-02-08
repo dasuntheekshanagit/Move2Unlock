@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'auth_screen.dart';
-import 'dashboard_screen.dart';
+import '../../../core/services/permission_service.dart';
+import '../../auth/screens/auth_screen.dart';
+import '../../dashboard/screens/dashboard_screen.dart';
 import 'permission_screen.dart';
-import '../services/permission_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
