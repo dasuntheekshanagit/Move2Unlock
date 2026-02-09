@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../app_lock/screens/apps_screen.dart';
 import '../../stats/screens/stats_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../../core/services/step_service.dart';
 import '../../app_lock/services/app_lock_service.dart';
+import '../../../core/theme/app_theme.dart';
 import 'home_content.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -62,6 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       body: Column(
@@ -70,60 +73,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
           SafeArea(
             bottom: false,
             child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.primary.withOpacity(0.08),
-                    theme.colorScheme.secondary.withOpacity(0.03),
-                  ],
-                ),
-              ),
-              padding: const EdgeInsets.only(
-                left: 24,
-                right: 24,
-                top: 16,
-                bottom: 16,
-              ),
+              color: theme.scaffoldBackgroundColor,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              theme.colorScheme.primary,
-                              theme.colorScheme.primary.withOpacity(0.8),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: theme.colorScheme.primary.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                      Hero(
+                        tag: 'app_logo',
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [AppTheme.primaryColor, AppTheme.primaryVariant],
                             ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.lock_clock_rounded,
-                          color: Colors.white,
-                          size: 18,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.lock_clock_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       Text(
                         'Move2Unlock',
-                        style: theme.textTheme.titleLarge?.copyWith(
+                        style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w800,
-                          fontSize: 18,
+                          fontSize: 20,
                           color: theme.colorScheme.onBackground,
                         ),
                       ),
@@ -135,8 +118,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       color: theme.colorScheme.onBackground,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
+                    color: isDark ? AppTheme.surfaceDark : AppTheme.surfaceLight,
+                    elevation: 4,
                     onSelected: (value) {
                       if (value == 'profile') {
                         _navigateToProfile();
@@ -146,25 +131,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     },
                     itemBuilder: (BuildContext context) =>
                         <PopupMenuEntry<String>>[
-                          const PopupMenuItem<String>(
+                          PopupMenuItem<String>(
                             value: 'profile',
                             child: ListTile(
-                              leading: Icon(Icons.person_outline, size: 20),
+                              leading: const Icon(Icons.person_outline, size: 20),
                               title: Text(
                                 'Profile',
-                                style: TextStyle(fontSize: 14),
+                                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
                               ),
                               contentPadding: EdgeInsets.zero,
                               dense: true,
                             ),
                           ),
-                          const PopupMenuItem<String>(
+                          PopupMenuItem<String>(
                             value: 'settings',
                             child: ListTile(
-                              leading: Icon(Icons.settings_outlined, size: 20),
+                              leading: const Icon(Icons.settings_outlined, size: 20),
                               title: Text(
                                 'Settings',
-                                style: TextStyle(fontSize: 14),
+                                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
                               ),
                               contentPadding: EdgeInsets.zero,
                               dense: true,
@@ -193,35 +178,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        backgroundColor: theme.colorScheme.surface,
-        elevation: 0,
-        indicatorColor: theme.colorScheme.primary.withOpacity(0.15),
-        height: 65,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined, size: 24),
-            selectedIcon: Icon(Icons.home_rounded, size: 24),
-            label: 'Home',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: theme.dividerColor,
+              width: 0.5,
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.apps_outlined, size: 24),
-            selectedIcon: Icon(Icons.apps_rounded, size: 24),
-            label: 'Apps',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_rounded, size: 24),
-            selectedIcon: Icon(Icons.bar_chart_rounded, size: 24),
-            label: 'Stats',
-          ),
-        ],
+        ),
+        child: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.apps_outlined),
+              selectedIcon: Icon(Icons.apps_rounded),
+              label: 'Apps',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.bar_chart_rounded),
+              selectedIcon: Icon(Icons.bar_chart_rounded),
+              label: 'Stats',
+            ),
+          ],
+        ),
       ),
     );
   }

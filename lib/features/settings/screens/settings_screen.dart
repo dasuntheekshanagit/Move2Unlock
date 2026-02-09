@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../main.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../support/screens/help_screen.dart';
 import '../../support/screens/support_screen.dart';
 
@@ -50,133 +53,65 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      body: Column(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Settings',
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(24),
         children: [
-          // Fixed Header with Back Button
-          SafeArea(
-            bottom: false,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.primary.withOpacity(0.08),
-                    theme.colorScheme.secondary.withOpacity(0.03),
-                  ],
-                ),
-              ),
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 24,
-                top: 12,
-                bottom: 12,
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 20,
-                      color: theme.colorScheme.onBackground,
-                    ),
-                    onPressed: () => Navigator.pop(context),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
-                    ),
-                  ),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                theme.colorScheme.primary,
-                                theme.colorScheme.primary.withOpacity(0.8),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: theme.colorScheme.primary.withOpacity(
-                                  0.2,
-                                ),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.settings_outlined,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Settings',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18,
-                            color: theme.colorScheme.onBackground,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Content Area
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(24),
+          _buildSectionHeader(theme, 'Preferences'),
+          Card(
+            child: Column(
               children: [
-                _buildSectionHeader(theme, 'Preferences'),
                 _buildSwitchTile(
                   theme,
                   'Dark Mode',
                   'Use dark theme',
                   Icons.dark_mode_rounded,
-                  theme.colorScheme.primary,
                   _darkMode,
                   (v) => _updateSetting('setting_dark_mode', v),
                 ),
+                Divider(color: theme.dividerColor),
                 _buildSwitchTile(
                   theme,
                   'Notifications',
                   'Enable push notifications',
                   Icons.notifications_rounded,
-                  theme.colorScheme.primary,
                   _notifications,
                   (v) => _updateSetting('setting_notifications', v),
                 ),
+                Divider(color: theme.dividerColor),
                 _buildSwitchTile(
                   theme,
                   'Sound Effects',
                   'Play sounds on interaction',
                   Icons.volume_up_rounded,
-                  theme.colorScheme.primary,
                   _soundEffects,
                   (v) => _updateSetting('setting_sound', v),
                 ),
-                const SizedBox(height: 32),
-                _buildSectionHeader(theme, 'Help & Support'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          _buildSectionHeader(theme, 'Help & Support'),
+          Card(
+            child: Column(
+              children: [
                 _buildActionTile(
                   theme,
                   'Help & FAQs',
                   null,
                   Icons.help_outline_rounded,
-                  theme.colorScheme.primary,
                   () {
                     Navigator.push(
                       context,
@@ -186,12 +121,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   },
                 ),
+                Divider(color: theme.dividerColor),
                 _buildActionTile(
                   theme,
                   'Contact Support',
                   null,
                   Icons.support_agent_rounded,
-                  theme.colorScheme.primary,
                   () {
                     Navigator.push(
                       context,
@@ -201,36 +136,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 32),
-                _buildSectionHeader(theme, 'About App'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          _buildSectionHeader(theme, 'About App'),
+          Card(
+            child: Column(
+              children: [
                 _buildActionTile(
                   theme,
                   'Version',
                   '1.0.0',
                   Icons.info_outline_rounded,
-                  theme.colorScheme.primary,
                   null,
                 ),
+                Divider(color: theme.dividerColor),
                 _buildActionTile(
                   theme,
                   'Terms of Service',
                   null,
                   Icons.description_outlined,
-                  theme.colorScheme.primary,
                   () {},
                 ),
+                Divider(color: theme.dividerColor),
                 _buildActionTile(
                   theme,
                   'Privacy Policy',
                   null,
                   Icons.privacy_tip_outlined,
-                  theme.colorScheme.primary,
                   () {},
                 ),
-                const SizedBox(height: 32),
               ],
             ),
           ),
+          const SizedBox(height: 32),
         ],
       ),
     );
@@ -238,12 +178,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildSectionHeader(ThemeData theme, String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16, left: 4),
+      padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Text(
         title.toUpperCase(),
-        style: theme.textTheme.labelMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: theme.colorScheme.onSurface.withOpacity(0.5),
+        style: GoogleFonts.inter(
+          fontWeight: FontWeight.w600,
+          color: AppTheme.primaryColor,
+          fontSize: 11,
           letterSpacing: 1.2,
         ),
       ),
@@ -255,79 +196,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
     String title,
     String subtitle,
     IconData icon,
-    Color color,
     bool value,
     ValueChanged<bool> onChanged,
   ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [color.withOpacity(0.08), color.withOpacity(0.02)],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        leading: Icon(icon, color: AppTheme.primaryColor, size: 24),
+        title: Text(
+          title,
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+        subtitle: Text(
+          subtitle,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            color: theme.colorScheme.onSurface.withOpacity(0.6),
           ),
-        ],
-      ),
-      child: SwitchListTile(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [color, color.withOpacity(0.8)],
-                ),
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(icon, size: 18, color: Colors.white),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
-        value: value,
-        onChanged: onChanged,
-        activeColor: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        trailing: CupertinoSwitch(
+          value: value,
+          onChanged: onChanged,
+          activeColor: AppTheme.primaryColor,
+        ),
       ),
     );
   }
@@ -337,72 +228,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
     String title,
     String? trailingText,
     IconData icon,
-    Color color,
     VoidCallback? onTap,
   ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [color.withOpacity(0.08), color.withOpacity(0.02)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+    return ListTile(
+      onTap: onTap,
+      leading: Icon(icon, color: AppTheme.primaryColor, size: 24),
+      title: Text(
+        title,
+        style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [color, color.withOpacity(0.8)],
-                ),
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+      trailing: trailingText != null
+          ? Text(
+              trailingText,
+              style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
               ),
-              child: Icon(icon, size: 18, color: Colors.white),
+            )
+          : Icon(
+              Icons.chevron_right_rounded,
+              size: 20,
+              color: theme.colorScheme.onSurface.withOpacity(0.3),
             ),
-            title: Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-            ),
-            trailing: trailingText != null
-                ? Text(
-                    trailingText,
-                    style: TextStyle(
-                      color: color,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  )
-                : Icon(Icons.arrow_forward_ios_rounded, size: 16, color: color),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

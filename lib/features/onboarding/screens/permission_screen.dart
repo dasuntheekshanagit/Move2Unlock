@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/services/permission_service.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../dashboard/screens/dashboard_screen.dart';
 
 class PermissionScreen extends StatefulWidget {
@@ -60,9 +62,7 @@ class _PermissionScreenState extends State<PermissionScreen>
   }
 
   Future<void> _requestUsage() async {
-    // TODO: Check?
     await _permissionService.requestUsageStatsPermission();
-    // Wait for user to return
   }
 
   Future<void> _requestOverlay() async {
@@ -78,7 +78,6 @@ class _PermissionScreenState extends State<PermissionScreen>
         MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );
     } else {
-      // Try to check again in case state is stale
       _checkPermissions().then((_) {
         if (_usageStatsPermission &&
             _activityPermission &&
@@ -105,244 +104,203 @@ class _PermissionScreenState extends State<PermissionScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const permissionColor = Color(0xFF6366F1); // Indigo color
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 130,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [permissionColor, Color(0xFF4F46E5)],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 40,
-                      right: -30,
-                      child: Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: -20,
-                      left: -20,
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Setup Permissions',
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Text(
+              'To help you stay focused and track your progress, Move2Unlock needs access to a few things.',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                height: 1.5,
+                fontSize: 14,
               ),
-              title: Text(
-                'Setup Permissions',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                ),
-              ),
-              centerTitle: false,
             ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+            const SizedBox(height: 32),
+            Expanded(
+              child: ListView(
                 children: [
-                  const SizedBox(height: 24),
-                  Text(
-                    'To help you stay focused and track your progress, Move2Unlock needs access to a few things.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
-                      height: 1.5,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
                   _buildPermissionTile(
                     context,
+                    1,
                     'Activity Recognition',
                     'Required to count your steps accurately.',
                     Icons.directions_walk_rounded,
                     _activityPermission,
                     _requestActivity,
-                    const Color(0xFF06B6D4),
+                    isLast: false,
                   ),
-                  const SizedBox(height: 12),
                   _buildPermissionTile(
                     context,
+                    2,
                     'Usage Access',
                     'Required to detect when you open locked apps.',
                     Icons.data_usage_rounded,
                     _usageStatsPermission,
                     _requestUsage,
-                    const Color(0xFFF59E0B),
+                    isLast: false,
                   ),
-                  const SizedBox(height: 12),
                   _buildPermissionTile(
                     context,
+                    3,
                     'Display Over Apps',
                     'Required to show the lock screen overlay.',
                     Icons.layers_rounded,
                     _overlayPermission,
                     _requestOverlay,
-                    const Color(0xFF10B981),
+                    isLast: true,
                   ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: _continue,
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shadowColor: permissionColor.withOpacity(0.4),
-                        elevation: 4,
-                      ),
-                      child: const Text(
-                        'Continue to Dashboard',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
                 ],
               ),
             ),
-          ),
-        ],
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _continue,
+                child: const Text('Continue to Dashboard'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildPermissionTile(
     BuildContext context,
+    int step,
     String title,
     String subtitle,
     IconData icon,
     bool isGranted,
-    VoidCallback onTap,
-    Color color,
-  ) {
+    VoidCallback onTap, {
+    required bool isLast,
+  }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      decoration: BoxDecoration(
-        gradient: isGranted
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [color.withOpacity(0.12), color.withOpacity(0.03)],
-              )
-            : null,
-        color: isGranted ? null : theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isGranted ? color.withOpacity(0.3) : Colors.transparent,
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isGranted
-                ? color.withOpacity(0.1)
-                : Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: isGranted ? null : onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    gradient: isGranted
-                        ? LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [color, color.withOpacity(0.8)],
-                          )
-                        : null,
-                    color: isGranted ? null : color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: isGranted
-                        ? [
-                            BoxShadow(
-                              color: color.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : [],
-                  ),
-                  child: Icon(
-                    isGranted ? Icons.check_rounded : icon,
-                    color: isGranted ? Colors.white : color,
-                    size: 20,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: isGranted ? AppTheme.secondaryColor : AppTheme.primaryColor,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: isGranted
+                      ? const Icon(Icons.check, color: Colors.white, size: 18)
+                      : Text(
+                          '$step',
+                          style: GoogleFonts.spaceGrotesk(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ),
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: theme.dividerColor,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: isGranted
-                              ? color
-                              : theme.colorScheme.onSurface,
-                          fontSize: 15,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
-                          height: 1.3,
-                          fontSize: 12,
-                        ),
+            ],
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 24.0),
+              child: InkWell(
+                onTap: isGranted ? null : onTap,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: theme.cardTheme.color,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: isDark ? [] : [
+                      BoxShadow(
+                        color: const Color(0x0A000000),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              subtitle,
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      if (isGranted)
+                        Text(
+                          'Granted',
+                          style: GoogleFonts.inter(
+                            color: AppTheme.secondaryColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        )
+                      else
+                        FilledButton.tonal(
+                          onPressed: onTap,
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('Grant'),
+                        ),
+                    ],
+                  ),
                 ),
-                if (!isGranted)
-                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: color),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

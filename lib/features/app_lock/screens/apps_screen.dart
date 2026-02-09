@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/app_lock_service.dart';
 import '../../../core/services/step_service.dart';
+import '../../../core/theme/app_theme.dart';
 import 'limit_settings_screen.dart';
 import 'app_selection_screen.dart';
 
@@ -79,6 +81,7 @@ class _AppsScreenState extends State<AppsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return ListView(
       padding: const EdgeInsets.all(24.0),
@@ -102,15 +105,19 @@ class _AppsScreenState extends State<AppsScreen> {
                 _refresh();
               },
               icon: const Icon(Icons.add_circle_outline, size: 18),
-              label: const Text('Manage'),
+              label: Text(
+                'Manage',
+                style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              ),
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: AppTheme.primaryColor,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         if (_isLoading)
           const Center(child: CircularProgressIndicator())
         else if (_lockedApps.isEmpty)
@@ -126,11 +133,12 @@ class _AppsScreenState extends State<AppsScreen> {
                 const SizedBox(height: 16),
                 Text(
                   'No apps locked yet',
-                  style: theme.textTheme.bodyLarge?.copyWith(
+                  style: GoogleFonts.inter(
                     color: theme.colorScheme.onSurface.withOpacity(0.5),
+                    fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 FilledButton.tonal(
                   onPressed: () async {
                     await Navigator.push(
@@ -161,15 +169,18 @@ class _AppsScreenState extends State<AppsScreen> {
   Widget _buildSectionTitle(ThemeData theme, String title) {
     return Text(
       title.toUpperCase(),
-      style: theme.textTheme.labelMedium?.copyWith(
+      style: GoogleFonts.inter(
         fontWeight: FontWeight.bold,
         color: theme.colorScheme.onSurface.withOpacity(0.5),
+        fontSize: 11,
         letterSpacing: 1.2,
       ),
     );
   }
 
   Widget _buildGlobalSettingsCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -177,28 +188,17 @@ class _AppsScreenState extends State<AppsScreen> {
           MaterialPageRoute(builder: (context) => const LimitSettingsScreen()),
         );
       },
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(24),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              theme.colorScheme.primary.withOpacity(0.08),
-              theme.colorScheme.primary.withOpacity(0.02),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: theme.colorScheme.primary.withOpacity(0.15),
-            width: 1,
-          ),
-          boxShadow: [
+          color: theme.cardTheme.color,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: isDark ? [] : [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: const Color(0x0A000000),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -207,24 +207,10 @@ class _AppsScreenState extends State<AppsScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.primary,
-                    theme.colorScheme.primary.withOpacity(0.8),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                color: AppTheme.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(Icons.tune_rounded, color: Colors.white, size: 22),
+              child: const Icon(Icons.tune_rounded, color: AppTheme.primaryColor, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -233,23 +219,26 @@ class _AppsScreenState extends State<AppsScreen> {
                 children: [
                   Text(
                     'Global Limits',
-                    style: theme.textTheme.titleMedium?.copyWith(
+                    style: GoogleFonts.plusJakartaSans(
                       fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Default rules for all apps',
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: GoogleFonts.inter(
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      fontSize: 13,
                     ),
                   ),
                 ],
               ),
             ),
             Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16,
+              Icons.chevron_right_rounded,
+              size: 24,
               color: theme.colorScheme.onSurface.withOpacity(0.3),
             ),
           ],
@@ -259,15 +248,7 @@ class _AppsScreenState extends State<AppsScreen> {
   }
 
   Widget _buildAppItem(ThemeData theme, AppInfo app, int index) {
-    // Color rotation across 4 vibrant colors
-    const colors = [
-      Color(0xFF06B6D4), // Cyan
-      Color(0xFFF59E0B), // Amber
-      Color(0xFF10B981), // Emerald
-      Color(0xFFEC4899), // Pink
-    ];
-    final color = colors[index % colors.length];
-
+    final isDark = theme.brightness == Brightness.dark;
     final stepRequirement = _appLockService.getStepRequirement(
       app.packageName ?? '',
     );
@@ -279,29 +260,25 @@ class _AppsScreenState extends State<AppsScreen> {
       0,
       stepRequirement,
     );
+    final progress = (_currentSteps / stepRequirement).clamp(0.0, 1.0);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [color.withOpacity(0.08), color.withOpacity(0.02)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: isDark ? [] : [
           BoxShadow(
-            color: color.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: const Color(0x0A000000),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
           onTap: () {
             _showAppUnlockDialog(
               theme,
@@ -309,105 +286,101 @@ class _AppsScreenState extends State<AppsScreen> {
               canUnlock,
               stepsRemaining,
               stepRequirement,
-              color,
             );
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.all(20),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [color, color.withOpacity(0.8)],
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withOpacity(0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: app.icon != null
-                      ? Image.memory(app.icon!, width: 24, height: 24)
-                      : Icon(Icons.android, size: 24, color: Colors.white),
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.memory(app.icon!, width: 48, height: 48),
+                        )
+                      : const Icon(Icons.android, size: 24),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         app.name ?? 'Unknown',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 6,
+                          backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            canUnlock ? AppTheme.secondaryColor : AppTheme.primaryColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       if (canUnlock)
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.check_circle,
-                              size: 14,
-                              color: Colors.green,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Ready to unlock',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.green,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppTheme.secondaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.check_circle_rounded,
+                                size: 14,
+                                color: AppTheme.secondaryColor,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Text(
+                                'Ready to unlock',
+                                style: GoogleFonts.inter(
+                                  color: AppTheme.secondaryColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         )
                       else
                         Text(
-                          'Need $stepsRemaining more steps',
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          '$stepsRemaining steps to unlock',
+                          style: GoogleFonts.inter(
                             color: theme.colorScheme.onSurface.withOpacity(0.5),
                             fontSize: 12,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                     ],
                   ),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [color, color.withOpacity(0.8)],
-                    ),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withOpacity(0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                const SizedBox(width: 12),
+                IconButton(
+                  icon: Icon(
+                    Icons.settings_outlined,
+                    color: theme.colorScheme.onSurface.withOpacity(0.4),
+                    size: 24,
                   ),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.settings_outlined,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    onPressed: () {
-                      _showStepSettingsDialog(theme, app, color);
-                    },
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(),
-                  ),
+                  onPressed: () {
+                    _showStepSettingsDialog(theme, app);
+                  },
                 ),
               ],
             ),
@@ -423,13 +396,18 @@ class _AppsScreenState extends State<AppsScreen> {
     bool canUnlock,
     int stepsRemaining,
     int stepRequirement,
-    Color color,
   ) {
+    final isDark = theme.brightness == Brightness.dark;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(app.name ?? 'App'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: theme.cardTheme.color,
+        title: Text(
+          app.name ?? 'App',
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -437,28 +415,25 @@ class _AppsScreenState extends State<AppsScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
-                ),
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: color.withOpacity(0.2)),
               ),
               child: Column(
                 children: [
                   Text(
                     '$_currentSteps',
-                    style: theme.textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: color,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.primaryColor,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Text(
                     'Steps Taken',
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: GoogleFonts.inter(
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      fontSize: 12,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -467,8 +442,8 @@ class _AppsScreenState extends State<AppsScreen> {
                     child: LinearProgressIndicator(
                       value: (_currentSteps / stepRequirement).clamp(0.0, 1.0),
                       minHeight: 8,
-                      backgroundColor: color.withOpacity(0.2),
-                      valueColor: AlwaysStoppedAnimation<Color>(color),
+                      backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -477,22 +452,27 @@ class _AppsScreenState extends State<AppsScreen> {
                     children: [
                       Text(
                         'Required: $stepRequirement',
-                        style: theme.textTheme.bodySmall,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        ),
                       ),
                       if (!canUnlock)
                         Text(
                           'Need: $stepsRemaining',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.error,
+                          style: GoogleFonts.inter(
+                            color: AppTheme.errorColor,
                             fontWeight: FontWeight.w600,
+                            fontSize: 12,
                           ),
                         )
                       else
                         Text(
                           'Complete!',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.green,
+                          style: GoogleFonts.inter(
+                            color: AppTheme.secondaryColor,
                             fontWeight: FontWeight.w600,
+                            fontSize: 12,
                           ),
                         ),
                     ],
@@ -505,8 +485,8 @@ class _AppsScreenState extends State<AppsScreen> {
               Text(
                 'You can now unlock this app!',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.green,
+                style: GoogleFonts.inter(
+                  color: AppTheme.secondaryColor,
                   fontWeight: FontWeight.w600,
                 ),
               )
@@ -514,7 +494,7 @@ class _AppsScreenState extends State<AppsScreen> {
               Text(
                 'Keep walking to unlock this app',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
+                style: GoogleFonts.inter(
                   color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
               ),
@@ -530,34 +510,41 @@ class _AppsScreenState extends State<AppsScreen> {
     );
   }
 
-  void _showStepSettingsDialog(ThemeData theme, AppInfo app, Color color) {
+  void _showStepSettingsDialog(ThemeData theme, AppInfo app) {
     final packageName = app.packageName ?? '';
     int currentRequirement = _appLockService.getStepRequirement(packageName);
+    final isDark = theme.brightness == Brightness.dark;
 
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(24),
           ),
-          title: Text('Set Step Requirement'),
+          backgroundColor: theme.cardTheme.color,
+          title: Text(
+            'Set Step Requirement',
+            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'App: ${app.name}',
-                style: theme.textTheme.bodyMedium?.copyWith(
+                style: GoogleFonts.inter(
                   fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface.withOpacity(0.8),
                 ),
               ),
               const SizedBox(height: 24),
               Text(
                 'Steps Required: $currentRequirement',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: color,
+                style: GoogleFonts.spaceGrotesk(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                  color: AppTheme.primaryColor,
                 ),
               ),
               const SizedBox(height: 16),
@@ -567,6 +554,7 @@ class _AppsScreenState extends State<AppsScreen> {
                 max: 500,
                 divisions: 49,
                 label: currentRequirement.toString(),
+                activeColor: AppTheme.primaryColor,
                 onChanged: (value) {
                   setState(() {
                     currentRequirement = value.toInt();
@@ -577,19 +565,24 @@ class _AppsScreenState extends State<AppsScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: color.withOpacity(0.2)),
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Current Steps:', style: theme.textTheme.bodySmall),
+                    Text(
+                      'Current Steps:', 
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      ),
+                    ),
                     Text(
                       '$_currentSteps',
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: GoogleFonts.spaceGrotesk(
                         fontWeight: FontWeight.w700,
-                        color: color,
+                        color: AppTheme.primaryColor,
                       ),
                     ),
                   ],

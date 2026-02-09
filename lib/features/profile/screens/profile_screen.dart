@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../auth/screens/auth_screen.dart';
+import '../../../core/theme/app_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -64,184 +66,118 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      body: Column(
-        children: [
-          // Fixed Header with Back Button
-          SafeArea(
-            bottom: false,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.primary.withOpacity(0.08),
-                    theme.colorScheme.secondary.withOpacity(0.03),
-                  ],
-                ),
-              ),
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 24,
-                top: 12,
-                bottom: 12,
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 20,
-                      color: theme.colorScheme.onBackground,
-                    ),
-                    onPressed: () => Navigator.pop(context),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'My Profile',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
-                        color: theme.colorScheme.onBackground,
-                      ),
-                    ),
-                  ),
-                  if (_isEditing)
-                    IconButton(
-                      icon: Icon(
-                        Icons.check_rounded,
-                        color: theme.colorScheme.primary,
-                      ),
-                      onPressed: _saveProfile,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 40,
-                        minHeight: 40,
-                      ),
-                    )
-                  else
-                    IconButton(
-                      icon: Icon(
-                        Icons.edit_rounded,
-                        color: theme.colorScheme.primary,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isEditing = true;
-                        });
-                      },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 40,
-                        minHeight: 40,
-                      ),
-                    ),
-                ],
-              ),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'My Profile',
+          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+        ),
+        actions: [
+          if (_isEditing)
+            IconButton(
+              icon: const Icon(Icons.check_rounded, color: AppTheme.primaryColor),
+              onPressed: _saveProfile,
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.edit_rounded, color: AppTheme.primaryColor),
+              onPressed: () {
+                setState(() {
+                  _isEditing = true;
+                });
+              },
             ),
-          ),
-          // Content Area
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(24.0),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(24.0),
+        children: [
+          const SizedBox(height: 20),
+          Center(
+            child: Column(
               children: [
-                const SizedBox(height: 20),
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              theme.colorScheme.primary,
-                              theme.colorScheme.primary.withOpacity(0.8),
-                            ],
-                          ),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: theme.colorScheme.primary.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.person_rounded,
-                          size: 60,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      _buildEditableField(
-                        theme,
-                        'Name',
-                        _nameController,
-                        Icons.person_outline,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildEditableField(
-                        theme,
-                        'Email',
-                        _emailController,
-                        Icons.email_outlined,
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppTheme.primaryColor, AppTheme.primaryVariant],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primaryColor.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 40),
-                _buildProfileOption(
-                  theme,
-                  'Change Password',
-                  Icons.lock_outline,
-                  theme.colorScheme.primary,
-                ),
-                _buildProfileOption(
-                  theme,
-                  'Notifications',
-                  Icons.notifications_outlined,
-                  theme.colorScheme.primary,
-                ),
-                _buildProfileOption(
-                  theme,
-                  'Privacy Policy',
-                  Icons.privacy_tip_outlined,
-                  theme.colorScheme.primary,
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _logout,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: theme.colorScheme.error.withOpacity(
-                        0.12,
-                      ),
-                      foregroundColor: theme.colorScheme.error,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Log Out',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                  child: Center(
+                    child: Text(
+                      _nameController.text.isNotEmpty 
+                          ? _nameController.text[0].toUpperCase() 
+                          : 'U',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
+                const SizedBox(height: 32),
+                _buildEditableField(
+                  theme,
+                  'Name',
+                  _nameController,
+                  Icons.person_outline,
+                ),
+                const SizedBox(height: 16),
+                _buildEditableField(
+                  theme,
+                  'Email',
+                  _emailController,
+                  Icons.email_outlined,
+                ),
               ],
+            ),
+          ),
+          const SizedBox(height: 40),
+          _buildProfileOption(
+            theme,
+            'Change Password',
+            Icons.lock_outline,
+          ),
+          _buildProfileOption(
+            theme,
+            'Notifications',
+            Icons.notifications_outlined,
+          ),
+          _buildProfileOption(
+            theme,
+            'Privacy Policy',
+            Icons.privacy_tip_outlined,
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: _logout,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppTheme.errorColor.withOpacity(0.1),
+                foregroundColor: AppTheme.errorColor,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                elevation: 0,
+              ),
+              child: const Text('Log Out'),
             ),
           ),
         ],
@@ -255,60 +191,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
     TextEditingController controller,
     IconData icon,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.primary.withOpacity(0.05),
-            theme.colorScheme.primary.withOpacity(0.01),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _isEditing
-              ? theme.colorScheme.primary.withOpacity(0.3)
-              : theme.colorScheme.primary.withOpacity(0.1),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return TextField(
+      controller: controller,
+      enabled: _isEditing,
+      style: GoogleFonts.inter(
+        fontWeight: FontWeight.w600,
+        fontSize: 14,
+        color: theme.colorScheme.onSurface,
       ),
-      child: TextField(
-        controller: controller,
-        enabled: _isEditing,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
-          color: _isEditing
-              ? theme.colorScheme.onSurface
-              : theme.colorScheme.onSurface.withOpacity(0.7),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.inter(
+          fontWeight: FontWeight.w500,
+          color: theme.colorScheme.onSurface.withOpacity(0.6),
+          fontSize: 12,
         ),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
-            fontSize: 12,
-          ),
-          prefixIcon: Icon(
-            icon,
-            size: 20,
-            color: theme.colorScheme.primary.withOpacity(0.6),
-          ),
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
+        prefixIcon: Icon(
+          icon,
+          size: 20,
+          color: AppTheme.primaryColor.withOpacity(0.6),
+        ),
+        filled: true,
+        fillColor: isDark ? AppTheme.surfaceDark : AppTheme.surfaceLight,
+        border: _isEditing 
+            ? OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppTheme.primaryColor),
+              )
+            : UnderlineInputBorder(
+                borderSide: BorderSide(color: theme.dividerColor),
+              ),
+        enabledBorder: _isEditing
+            ? OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppTheme.primaryColor),
+              )
+            : UnderlineInputBorder(
+                borderSide: BorderSide(color: theme.dividerColor),
+              ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
         ),
       ),
     );
@@ -318,70 +247,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ThemeData theme,
     String title,
     IconData icon,
-    Color color,
   ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [color.withOpacity(0.08), color.withOpacity(0.02)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.2), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {},
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [color, color.withOpacity(0.8)],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withOpacity(0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(icon, size: 20, color: Colors.white),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                Icon(Icons.arrow_forward_ios_rounded, size: 16, color: color),
-              ],
-            ),
-          ),
+    return ListTile(
+      onTap: () {},
+      leading: Icon(icon, size: 24, color: AppTheme.primaryColor),
+      title: Text(
+        title,
+        style: GoogleFonts.inter(
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
         ),
       ),
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        size: 20,
+        color: theme.colorScheme.onSurface.withOpacity(0.3),
+      ),
+      contentPadding: EdgeInsets.zero,
     );
   }
 }
