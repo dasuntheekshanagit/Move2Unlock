@@ -169,7 +169,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                 children: [
                   const SizedBox(height: 24),
                   Text(
-                    'To help you stay focused and track your progress, Motivation Lock needs access to a few things.',
+                    'To help you stay focused and track your progress, Move2Unlock needs access to a few things.',
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurface.withOpacity(0.7),
@@ -318,7 +318,7 @@ class _PermissionScreenState extends State<PermissionScreen>
                       Text(
                         title,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                           color: isGranted
                               ? color
                               : theme.colorScheme.onSurface,

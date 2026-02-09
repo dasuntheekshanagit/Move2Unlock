@@ -431,20 +431,19 @@ class _AuthScreenState extends State<AuthScreen>
         const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          // TODO: use colored icons
           children: [
-            _buildSocialButton(Icons.apple, theme, isDark),
+            _buildSocialButton(Icons.apple, theme, isDark, Colors.black),
             const SizedBox(width: 16),
-            _buildSocialButton(Icons.g_mobiledata, theme, isDark),
+            _buildSocialButton(Icons.g_mobiledata, theme, isDark, Colors.red),
             const SizedBox(width: 16),
-            _buildSocialButton(Icons.facebook, theme, isDark),
+            _buildSocialButton(Icons.facebook, theme, isDark, Colors.blue),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildSocialButton(IconData icon, ThemeData theme, bool isDark) {
+  Widget _buildSocialButton(IconData icon, ThemeData theme, bool isDark, Color iconColor) {
     return InkWell(
       onTap: () {},
       borderRadius: BorderRadius.circular(14),
@@ -466,7 +465,7 @@ class _AuthScreenState extends State<AuthScreen>
           ),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Icon(icon, size: 24, color: const Color(0xFF6366F1)),
+        child: Icon(icon, size: 24, color: iconColor),
       ),
     );
   }

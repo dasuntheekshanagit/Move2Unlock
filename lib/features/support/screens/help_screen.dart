@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// TODO: use the template and theme as other screens do
 class HelpScreen extends StatelessWidget {
   const HelpScreen({super.key});
 
@@ -78,8 +77,8 @@ class HelpScreen extends StatelessWidget {
                 children: [
                   _buildFAQItem(
                     theme,
-                    'How does Motivation Lock work?',
-                    'Motivation Lock helps you stay focused by locking apps you select. You can unlock them by completing tasks like taking steps or waiting for a time limit. It\'s designed to encourage productivity and help you achieve your goals.',
+                    'How does Move2Unlock work?',
+                    'Move2Unlock helps you stay focused by locking apps you select. You can unlock them by completing tasks like taking steps or waiting for a time limit. It\'s designed to encourage productivity and help you achieve your goals.',
                     Icons.question_answer_rounded,
                     const Color(0xFF06B6D4),
                   ),

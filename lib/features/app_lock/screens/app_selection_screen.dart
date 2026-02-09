@@ -71,13 +71,12 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                   backgroundColor: theme.scaffoldBackgroundColor,
                   flexibleSpace: FlexibleSpaceBar(
                     titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
-                    // TODO: text is too large. use a template as others screen do.
                     title: Text(
                       'Select Apps',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: theme.colorScheme.onBackground,
-                        fontSize: 22,
+                        fontSize: 18,
                       ),
                     ),
                   ),

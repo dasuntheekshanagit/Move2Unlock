@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
 
    <application
-        android:label="motivation_lock"
+        android:label="Move2Unlock"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

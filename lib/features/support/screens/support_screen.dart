@@ -95,7 +95,7 @@ class SupportScreen extends StatelessWidget {
                   _buildContactTile(
                     theme,
                     'Email Support',
-                    'support@motivationlock.com',
+                    'support@move2unlock.com',
                     Icons.email_outlined,
                     const Color(0xFF3B82F6),
                   ),
@@ -103,7 +103,7 @@ class SupportScreen extends StatelessWidget {
                   _buildContactTile(
                     theme,
                     'Report a Bug',
-                    'bugs@motivationlock.com',
+                    'bugs@move2unlock.com',
                     Icons.bug_report_outlined,
                     const Color(0xFFF59E0B),
                   ),
@@ -111,7 +111,7 @@ class SupportScreen extends StatelessWidget {
                   _buildContactTile(
                     theme,
                     'Feature Request',
-                    'feedback@motivationlock.com',
+                    'feedback@move2unlock.com',
                     Icons.lightbulb_outline,
                     const Color(0xFF10B981),
                   ),
@@ -119,7 +119,7 @@ class SupportScreen extends StatelessWidget {
                   _buildContactTile(
                     theme,
                     'Follow on Twitter',
-                    '@MotivationLock',
+                    '@Move2Unlock',
                     Icons.favorite_outline,
                     const Color(0xFF06B6D4),
                   ),

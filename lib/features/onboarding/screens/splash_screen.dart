@@ -113,7 +113,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Motivation Lock',
+                      'Move2Unlock',
                       style: theme.textTheme.displayLarge?.copyWith(
                         fontSize: 32,
                         fontWeight: FontWeight.w800,
