@@ -49,10 +49,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     final isLoggedIn = prefs.containsKey('user_name');
 
     if (isLoggedIn) {
-      final permissionService = PermissionService();
-      bool usage = await permissionService.checkUsageStatsPermission();
-      bool activity = await permissionService.checkActivityRecognitionPermission();
-      bool overlay = await permissionService.checkOverlayPermission();
+      bool usage = await PermissionService.checkUsageStatsPermission();
+      bool activity = await PermissionService.checkActivityRecognitionPermission();
+      bool overlay = await PermissionService.checkOverlayPermission();
 
       if (mounted) {
         if (usage && activity && overlay) {

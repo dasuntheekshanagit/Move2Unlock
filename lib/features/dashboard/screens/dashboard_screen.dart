@@ -8,6 +8,8 @@ import '../../../core/services/step_service.dart';
 import '../../app_lock/services/app_lock_service.dart';
 import '../../../core/theme/app_theme.dart';
 import 'home_content.dart';
+import '../../onboarding/screens/permission_screen.dart';
+import '../../../core/services/permission_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -22,29 +24,66 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   int _steps = 0;
   int _selectedIndex = 0;
+  bool _isError = false;
+  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _initServices();
+    _checkPermissionsAndInit();
+  }
+
+  Future<void> _checkPermissionsAndInit() async {
+    try {
+      bool allGranted = await PermissionService.requestAllPermissions();
+      if (!allGranted) {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const PermissionScreen()),
+          );
+        }
+        return;
+      }
+      await _initServices();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isError = true;
+          _errorMessage = 'Failed to initialize services: $e';
+        });
+      }
+    }
   }
 
   Future<void> _initServices() async {
-    await _stepService.init();
-    await _appLockService.init();
+    try {
+      await _stepService.init();
+      await _appLockService.init();
 
-    _stepService.stepStream.listen((steps) {
+      _stepService.stepStream.listen((steps) {
+        if (mounted) {
+          setState(() {
+            _steps = steps;
+          });
+        }
+      }, onError: (error) {
+        print('Step stream error: $error');
+        // Optionally handle stream errors without crashing the UI
+      });
+
+      // Initial load
+      setState(() {
+        _steps = _stepService.getCurrentSteps();
+      });
+    } catch (e) {
+      print('Error initializing services: $e');
       if (mounted) {
         setState(() {
-          _steps = steps;
+          _isError = true;
+          _errorMessage = 'Error initializing services. Please check if your device supports step counting.';
         });
       }
-    });
-
-    // Initial load
-    setState(() {
-      _steps = _stepService.getCurrentSteps();
-    });
+    }
   }
 
   void _navigateToProfile() {
@@ -65,6 +104,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    if (_isError) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
+                const SizedBox(height: 16),
+                Text(
+                  'Something went wrong',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _errorMessage,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: () {
+                    setState(() {
+                      _isError = false;
+                      _errorMessage = '';
+                    });
+                    _checkPermissionsAndInit();
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: Column(

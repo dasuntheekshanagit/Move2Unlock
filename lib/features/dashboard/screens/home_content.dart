@@ -2,12 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/step_service.dart';
 
-class HomeContent extends StatelessWidget {
+class HomeContent extends StatefulWidget {
   final int steps;
   final VoidCallback onStatsTap;
 
   const HomeContent({super.key, required this.steps, required this.onStatsTap});
+
+  @override
+  State<HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  final StepService _stepService = StepService();
+  Map<String, int> _weeklySteps = {};
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWeeklyData();
+  }
+
+  Future<void> _loadWeeklyData() async {
+    try {
+      final data = await _stepService.getWeeklySteps();
+      if (mounted) {
+        setState(() {
+          _weeklySteps = data;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,12 +53,12 @@ class HomeContent extends StatelessWidget {
         const SizedBox(height: 24),
         _buildGreetingCard(theme),
         const SizedBox(height: 32),
-        _buildStepsCard(theme, steps),
+        _buildStepsCard(theme, widget.steps),
         const SizedBox(height: 32),
         _buildMotivationCard(theme),
         const SizedBox(height: 32),
         GestureDetector(
-          onTap: onStatsTap,
+          onTap: widget.onStatsTap,
           child: _buildSmallStatGraph(theme),
         ),
         const SizedBox(height: 80),
@@ -135,6 +169,20 @@ class HomeContent extends StatelessWidget {
   Widget _buildSmallStatGraph(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
     
+    // Prepare data for graph
+    final now = DateTime.now();
+    final days = List.generate(7, (index) {
+      final date = now.subtract(Duration(days: 6 - index));
+      return date.toIso8601String().split('T')[0];
+    });
+    
+    // Find max steps for scaling
+    int maxSteps = 1;
+    for (var steps in _weeklySteps.values) {
+      if (steps > maxSteps) maxSteps = steps;
+    }
+    if (maxSteps < 10000) maxSteps = 10000; // Minimum scale
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -184,13 +232,21 @@ class HomeContent extends StatelessWidget {
           const SizedBox(height: 24),
           SizedBox(
             height: 150,
-            child: Row(
+            child: _isLoading 
+              ? const Center(child: CircularProgressIndicator())
+              : Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(7, (index) {
-                final data = [0.4, 0.6, 0.3, 0.8, 0.5, 0.9, 0.7];
-                final value = data[index];
+                final dateKey = days[index];
+                final steps = _weeklySteps[dateKey] ?? 0;
+                final value = (steps / maxSteps).clamp(0.0, 1.0);
                 final isToday = index == 6;
+                
+                // Day label
+                final date = DateTime.parse(dateKey);
+                final dayLabel = ['M', 'T', 'W', 'T', 'F', 'S', 'S'][date.weekday - 1];
+
                 return TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0, end: value),
                   duration: Duration(milliseconds: 500 + (index * 100)),
@@ -201,7 +257,7 @@ class HomeContent extends StatelessWidget {
                       children: [
                         Container(
                           width: 12,
-                          height: 100 * animatedValue,
+                          height: math.max(4, 100 * animatedValue), // Min height 4
                           decoration: BoxDecoration(
                             gradient: isToday ? const LinearGradient(
                               begin: Alignment.topCenter,
@@ -221,7 +277,7 @@ class HomeContent extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          ['M', 'T', 'W', 'T', 'F', 'S', 'S'][index],
+                          dayLabel,
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,

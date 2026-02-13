@@ -9,13 +9,11 @@ class PaywallScreen extends StatelessWidget {
   const PaywallScreen({super.key});
 
   Future<void> _close(BuildContext context) async {
-    final permissionService = PermissionService();
-
     // Check if all permissions are granted
-    bool usage = await permissionService.checkUsageStatsPermission();
-    bool activity = await permissionService
+    bool usage = await PermissionService.checkUsageStatsPermission();
+    bool activity = await PermissionService
         .checkActivityRecognitionPermission();
-    bool overlay = await permissionService.checkOverlayPermission();
+    bool overlay = await PermissionService.checkOverlayPermission();
 
     if (context.mounted) {
       if (usage && activity && overlay) {

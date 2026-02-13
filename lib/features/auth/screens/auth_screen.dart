@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../paywall/screens/paywall_screen.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -25,16 +26,22 @@ class _AuthScreenState extends State<AuthScreen>
     super.dispose();
   }
 
-  void _submit() {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const PaywallScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
+  Future<void> _submit() async {
+    // Simulate login/signup
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_name', _nameController.text.isNotEmpty ? _nameController.text : 'User');
+    
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const PaywallScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      );
+    }
   }
 
   @override

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'features/splash/screens/splash_screen.dart';
 import 'core/theme/app_theme.dart';
+import 'core/services/permission_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,8 +12,11 @@ void main() {
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark,
   ));
-  // Preload fonts
-  GoogleFonts.config.allowRuntimeFetching = true;
+  // Disable runtime font fetching to avoid network errors
+  // GoogleFonts.config.allowRuntimeFetching = false;
+
+  // Request permissions early
+  PermissionService.requestAllPermissions();
 
   runApp(const MotivationLockApp());
 }
@@ -21,13 +25,13 @@ class MotivationLockApp extends StatefulWidget {
   const MotivationLockApp({super.key});
 
   @override
-  State<MotivationLockApp> createState() => _MotivationLockAppState();
+  State<MotivationLockApp> createState() => MotivationLockAppState();
   
-  static _MotivationLockAppState? of(BuildContext context) =>
-      context.findAncestorStateOfType<_MotivationLockAppState>();
+  static MotivationLockAppState? of(BuildContext context) =>
+      context.findAncestorStateOfType<MotivationLockAppState>();
 }
 
-class _MotivationLockAppState extends State<MotivationLockApp> {
+class MotivationLockAppState extends State<MotivationLockApp> {
   ThemeMode _themeMode = ThemeMode.system;
 
   @override

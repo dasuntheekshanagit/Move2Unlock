@@ -13,7 +13,6 @@ class PermissionScreen extends StatefulWidget {
 
 class _PermissionScreenState extends State<PermissionScreen>
     with WidgetsBindingObserver {
-  final PermissionService _permissionService = PermissionService();
   bool _activityPermission = false;
   bool _usageStatsPermission = false;
   bool _overlayPermission = false;
@@ -39,10 +38,10 @@ class _PermissionScreenState extends State<PermissionScreen>
   }
 
   Future<void> _checkPermissions() async {
-    bool usage = await _permissionService.checkUsageStatsPermission();
-    bool activity = await _permissionService
+    bool usage = await PermissionService.checkUsageStatsPermission();
+    bool activity = await PermissionService
         .checkActivityRecognitionPermission();
-    bool overlay = await _permissionService.checkOverlayPermission();
+    bool overlay = await PermissionService.checkOverlayPermission();
 
     if (mounted) {
       setState(() {
@@ -54,7 +53,7 @@ class _PermissionScreenState extends State<PermissionScreen>
   }
 
   Future<void> _requestActivity() async {
-    bool granted = await _permissionService
+    bool granted = await PermissionService
         .requestActivityRecognitionPermission();
     setState(() {
       _activityPermission = granted;
@@ -62,11 +61,11 @@ class _PermissionScreenState extends State<PermissionScreen>
   }
 
   Future<void> _requestUsage() async {
-    await _permissionService.requestUsageStatsPermission();
+    await PermissionService.requestUsageStatsPermission();
   }
 
   Future<void> _requestOverlay() async {
-    bool granted = await _permissionService.requestOverlayPermission();
+    bool granted = await PermissionService.requestOverlayPermission();
     setState(() {
       _overlayPermission = granted;
     });

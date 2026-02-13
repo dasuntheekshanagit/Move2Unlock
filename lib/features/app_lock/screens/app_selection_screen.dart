@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../app_lock/services/app_lock_service.dart';
+import '../../../core/theme/app_theme.dart';
 import 'limit_settings_screen.dart';
 
 class AppSelectionScreen extends StatefulWidget {
@@ -49,6 +51,8 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     final filteredApps = _installedApps.where((app) {
       return (app.name ?? '').toLowerCase().contains(
         _searchQuery.toLowerCase(),
@@ -73,7 +77,7 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                     titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
                     title: Text(
                       'Select Apps',
-                      style: theme.textTheme.headlineSmall?.copyWith(
+                      style: GoogleFonts.plusJakartaSans(
                         fontWeight: FontWeight.w800,
                         color: theme.colorScheme.onBackground,
                         fontSize: 18,
@@ -98,7 +102,7 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                           _searchQuery = value;
                         });
                       },
-                      style: const TextStyle(fontSize: 14),
+                      style: GoogleFonts.inter(fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Search apps...',
                         prefixIcon: Icon(
@@ -174,12 +178,10 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                               border: Border.all(
                                 color: isSelected
                                     ? theme.colorScheme.primary.withOpacity(0.3)
-                                    : theme.colorScheme.primary.withOpacity(
-                                        0.1,
-                                      ),
+                                    : Colors.transparent,
                                 width: 1.5,
                               ),
-                              boxShadow: [
+                              boxShadow: isDark ? [] : [
                                 BoxShadow(
                                   color: isSelected
                                       ? theme.colorScheme.primary.withOpacity(
@@ -198,9 +200,7 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                                   decoration: BoxDecoration(
                                     color: isSelected
                                         ? theme.colorScheme.primary
-                                        : theme
-                                              .colorScheme
-                                              .surfaceContainerHighest,
+                                        : (isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: app.icon != null
@@ -227,50 +227,33 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                                     children: [
                                       Text(
                                         app.name ?? 'Unknown',
-                                        style: theme.textTheme.bodyLarge
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                              color: isSelected
-                                                  ? theme.colorScheme.primary
-                                                  : theme.colorScheme.onSurface,
-                                              fontSize: 14,
-                                            ),
+                                        style: GoogleFonts.inter(
+                                          fontWeight: FontWeight.w600,
+                                          color: isSelected
+                                              ? theme.colorScheme.primary
+                                              : theme.colorScheme.onSurface,
+                                          fontSize: 14,
+                                        ),
                                       ),
                                       if (isSelected)
                                         Text(
                                           'Tap to configure limits',
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                                color: theme
-                                                    .colorScheme
-                                                    .onSurface
-                                                    .withOpacity(0.5),
-                                                fontSize: 10,
-                                              ),
+                                          style: GoogleFonts.inter(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurface
+                                                .withOpacity(0.5),
+                                            fontSize: 10,
+                                          ),
                                         ),
                                     ],
                                   ),
                                 ),
                                 if (isSelected)
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.settings_outlined,
-                                      size: 20,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              LimitSettingsScreen(
-                                                appName: app.name,
-                                              ),
-                                        ),
-                                      );
-                                    },
+                                  Icon(
+                                    Icons.check_circle_rounded,
+                                    size: 20,
+                                    color: theme.colorScheme.primary,
                                   )
                                 else
                                   Icon(
@@ -295,9 +278,9 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
           await _appLockService.setLockedApps(_lockedPackages);
           if (mounted) Navigator.pop(context);
         },
-        label: const Text(
+        label: Text(
           'Save Selection',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
         ),
         icon: const Icon(Icons.check_rounded, size: 20),
         backgroundColor: theme.colorScheme.primary,

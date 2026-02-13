@@ -1,14 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:math' as math;
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/step_service.dart';
 
-class StatsScreen extends StatelessWidget {
+class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
+
+  @override
+  State<StatsScreen> createState() => _StatsScreenState();
+}
+
+class _StatsScreenState extends State<StatsScreen> {
+  final StepService _stepService = StepService();
+  Map<String, int> _weeklySteps = {};
+  int _totalSteps = 0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final weekly = await _stepService.getWeeklySteps();
+      final total = await _stepService.getTotalStepsAllTime();
+      
+      if (mounted) {
+        setState(() {
+          _weeklySteps = weekly;
+          _totalSteps = total;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    // Prepare data for graph
+    final now = DateTime.now();
+    final days = List.generate(7, (index) {
+      final date = now.subtract(Duration(days: 6 - index));
+      return date.toIso8601String().split('T')[0];
+    });
+    
+    // Find max steps for scaling
+    int maxSteps = 1;
+    for (var steps in _weeklySteps.values) {
+      if (steps > maxSteps) maxSteps = steps;
+    }
+    if (maxSteps < 10000) maxSteps = 10000;
 
     return ListView(
       padding: const EdgeInsets.all(24.0),
@@ -16,24 +69,26 @@ class StatsScreen extends StatelessWidget {
         _buildStatCard(
           theme,
           'Total Steps',
-          45231,
+          _totalSteps,
           Icons.directions_walk_rounded,
           const Color(0xFF10B981),
         ),
         const SizedBox(height: 16),
+        // Placeholder for Time Saved - logic needs to be implemented based on app usage
         _buildStatCard(
           theme,
           'Time Saved',
-          12, // Hours
+          0, 
           Icons.hourglass_empty_rounded,
           const Color(0xFFF59E0B),
-          suffix: 'h 30m',
+          suffix: 'h 0m',
         ),
         const SizedBox(height: 16),
+        // Placeholder for Apps Unlocked - logic needs to be implemented
         _buildStatCard(
           theme,
           'Apps Unlocked',
-          156,
+          0,
           Icons.lock_open_rounded,
           const Color(0xFF06B6D4),
         ),
@@ -61,15 +116,23 @@ class StatsScreen extends StatelessWidget {
               ),
             ],
           ),
-          child: Column(
+          child: _isLoading 
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
             children: [
               Expanded(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(7, (index) {
-                    final value = [0.4, 0.6, 0.3, 0.8, 0.5, 0.9, 0.7][index];
+                    final dateKey = days[index];
+                    final steps = _weeklySteps[dateKey] ?? 0;
+                    final value = (steps / maxSteps).clamp(0.0, 1.0);
                     final isToday = index == 6;
+                    
+                    final date = DateTime.parse(dateKey);
+                    final dayLabel = ['M', 'T', 'W', 'T', 'F', 'S', 'S'][date.weekday - 1];
+
                     return TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0, end: value),
                       duration: Duration(milliseconds: 500 + (index * 100)),
@@ -80,7 +143,7 @@ class StatsScreen extends StatelessWidget {
                           children: [
                             Container(
                               width: 16,
-                              height: 140 * animatedValue,
+                              height: math.max(4, 140 * animatedValue),
                               decoration: BoxDecoration(
                                 gradient: isToday ? const LinearGradient(
                                   begin: Alignment.topCenter,
@@ -100,7 +163,7 @@ class StatsScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              ['M', 'T', 'W', 'T', 'F', 'S', 'S'][index],
+                              dayLabel,
                               style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -171,38 +234,39 @@ class StatsScreen extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
+                const SizedBox(height: 4),
+                TweenAnimationBuilder<int>(
+                  tween: IntTween(begin: 0, end: value),
+                  duration: const Duration(seconds: 2),
+                  curve: Curves.easeOutExpo,
+                  builder: (context, animatedValue, child) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          animatedValue.toString(),
+                          style: GoogleFonts.spaceGrotesk(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 24,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        if (suffix != null)
+                          Text(
+                            suffix,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 24,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
               ],
             ),
-          ),
-          TweenAnimationBuilder<int>(
-            tween: IntTween(begin: 0, end: value),
-            duration: const Duration(seconds: 2),
-            curve: Curves.easeOutExpo,
-            builder: (context, animatedValue, child) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Text(
-                    animatedValue.toString(),
-                    style: GoogleFonts.spaceGrotesk(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 24,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  if (suffix != null)
-                    Text(
-                      suffix,
-                      style: GoogleFonts.spaceGrotesk(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 24,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                ],
-              );
-            },
           ),
         ],
       ),

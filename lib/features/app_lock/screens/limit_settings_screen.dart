@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LimitSettingsScreen extends StatefulWidget {
   final String? appName;
@@ -55,6 +56,7 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Settings saved')));
+      Navigator.pop(context);
     }
   }
 
@@ -79,10 +81,10 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w800,
                   color: theme.colorScheme.onBackground,
-                  fontSize: 16,
+                  fontSize: 18,
                 ),
               ),
             ),
@@ -312,9 +314,9 @@ class _LimitSettingsScreenState extends State<LimitSettingsScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _saveSettings,
-        label: const Text(
+        label: Text(
           'Save Settings',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         icon: const Icon(Icons.save_rounded),
         backgroundColor: theme.colorScheme.primary,

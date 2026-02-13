@@ -603,7 +603,8 @@ class _AppsScreenState extends State<AppsScreen> {
                 );
                 if (mounted) {
                   Navigator.pop(context);
-                  setState(() {});
+                  // Refresh the parent widget
+                  this.setState(() {});
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
