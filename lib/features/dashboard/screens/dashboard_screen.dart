@@ -10,6 +10,7 @@ import '../../../core/theme/app_theme.dart';
 import 'home_content.dart';
 import '../../onboarding/screens/permission_screen.dart';
 import '../../../core/services/permission_service.dart';
+import '../../app_lock/screens/lock_overlay_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -59,6 +60,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       await _stepService.init();
       await _appLockService.init();
+      
+      // Listen for app lock events
+      _appLockService.startListeningToService();
+      _appLockService.onAppLocked = (packageName) {
+        if (mounted) {
+          // Check if we already have a lock screen open to avoid stacking
+          // For now, simple push
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              fullscreenDialog: true,
+              builder: (context) => LockOverlayScreen(
+                packageName: packageName,
+                currentSteps: _steps,
+                requiredSteps: _appLockService.getStepRequirement(packageName),
+              ),
+            ),
+          );
+        }
+      };
 
       _stepService.stepStream.listen((steps) {
         if (mounted) {

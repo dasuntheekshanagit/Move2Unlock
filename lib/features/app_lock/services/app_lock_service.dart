@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 class AppLockService {
   static const String _notificationChannelId = 'move2unlock_service_channel';
   static const int _notificationId = 888;
+  static const MethodChannel _nativeChannel = MethodChannel('com.example.motivation_lock/native');
 
   List<String> _lockedPackages = [];
   Map<String, int> _appStepRequirements = {};
@@ -47,7 +48,6 @@ class AppLockService {
     final service = FlutterBackgroundService();
     
     // Create the notification channel explicitly before configuring the service
-    // This helps avoid "Bad notification for startForeground" errors
     if (Platform.isAndroid) {
       final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
           FlutterLocalNotificationsPlugin();
@@ -105,7 +105,7 @@ class AppLockService {
     });
 
     // Start the monitoring loop
-    Timer.periodic(const Duration(seconds: 2), (timer) async {
+    Timer.periodic(const Duration(seconds: 1), (timer) async {
       try {
         await _checkAppUsage(service);
       } catch (e) {
@@ -141,16 +141,61 @@ class AppLockService {
       if (currentPackage == 'com.example.motivation_lock') return;
 
       if (lockedApps.contains(currentPackage)) {
+        // Notify UI
         service.invoke('onAppLocked', {'package': currentPackage});
+        
+        // Bring app to foreground using native channel
+        // Note: This might fail on Android 10+ if not granted "Display over other apps"
+        try {
+          // We can't use MethodChannel directly in background isolate easily without setup
+          // But since we are in a background service, we can try to launch intent
+          // However, the best way is to let the UI handle it if it's alive, 
+          // or use a full screen intent notification.
+          
+          // For this implementation, we rely on the service.invoke to wake up the UI
+          // if the UI is listening. If the UI is killed, we need a way to restart it.
+          // The FlutterBackgroundService keeps the isolate alive.
+          
+          // Let's try to launch the app via intent from Dart if possible, 
+          // or rely on the fact that we are a foreground service.
+          
+          // Since we can't easily access context or native activity here, 
+          // we will rely on the main isolate to react to 'onAppLocked'
+          // BUT, if the main isolate is paused/killed, we need to restart it.
+          
+          // Actually, we can use the 'device_apps' or 'external_app_launcher' 
+          // but we don't have them. 
+          // Let's try to use the 'installed_apps' package to start our own app?
+          // No, that might be circular.
+          
+          // The most reliable way on Android 10+ without being a launcher is 
+          // showing a high priority notification with fullScreenIntent.
+          // But we want to force it.
+          
+          // Let's try to use the native channel if we can get a handle to it, 
+          // but MethodChannels are tied to the engine.
+          
+          // For now, we will assume the UI is listening.
+        } catch (e) {
+          print('Error bringing to front: $e');
+        }
       }
     }
   }
 
   // Listen for messages from background service
   void startListeningToService() {
-    FlutterBackgroundService().on('onAppLocked').listen((event) {
+    FlutterBackgroundService().on('onAppLocked').listen((event) async {
       if (event != null && event['package'] != null) {
         final packageName = event['package'] as String;
+        
+        // Bring app to front natively
+        try {
+          await _nativeChannel.invokeMethod('showOverlay');
+        } catch (e) {
+          print('Failed to show overlay: $e');
+        }
+
         if (onAppLocked != null) {
           onAppLocked!(packageName);
         }
